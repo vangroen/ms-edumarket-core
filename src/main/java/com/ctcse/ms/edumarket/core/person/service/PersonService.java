@@ -1,0 +1,70 @@
+package com.ctcse.ms.edumarket.core.person.service;
+
+import com.ctcse.ms.edumarket.core.common.exception.ResourceNotFoundException;
+import com.ctcse.ms.edumarket.core.documentType.dto.DocumentTypeDto;
+import com.ctcse.ms.edumarket.core.documentType.entity.DocumentTypeEntity;
+import com.ctcse.ms.edumarket.core.documentType.repository.DocumentTypeRepository;
+import com.ctcse.ms.edumarket.core.person.dto.CreatePersonRequest;
+import com.ctcse.ms.edumarket.core.person.dto.PersonDto;
+import com.ctcse.ms.edumarket.core.person.entity.PersonEntity;
+import com.ctcse.ms.edumarket.core.person.repository.PersonRepository;
+import org.springframework.transaction.annotation.Transactional;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
+
+import java.util.List;
+import java.util.stream.Collectors;
+
+@Service
+@RequiredArgsConstructor
+public class PersonService {
+
+    private final PersonRepository personRepository;
+    private final DocumentTypeRepository documentTypeRepository;
+
+    @Transactional(readOnly = true)
+    public List<PersonDto> findAll() {
+        List<PersonEntity> entities = personRepository.findAll();
+        return entities.stream()
+                .map(this::convertToDto)
+                .collect(Collectors.toList());
+    }
+
+    private PersonDto convertToDto(PersonEntity entity) {
+        PersonDto dto = new PersonDto();
+        dto.setId(entity.getId());
+        dto.setFirstName(entity.getFirstName());
+        dto.setLastName(entity.getLastName());
+        dto.setEmail(entity.getEmail());
+        dto.setPhone(entity.getPhone());
+        dto.setAddress(entity.getAddress());
+        dto.setDocumentNumber(entity.getDocumentNumber());
+
+        if (entity.getDocumentType() != null) {
+            var docTypeDto = new DocumentTypeDto();
+            docTypeDto.setId(entity.getDocumentType().getId());
+            docTypeDto.setDescription(entity.getDocumentType().getDescription());
+            dto.setDocumentType(docTypeDto);
+        }
+
+        return dto;
+    }
+
+    @Transactional
+    public PersonDto create(CreatePersonRequest request) {
+        DocumentTypeEntity documentTypeEntity = documentTypeRepository.findById(request.getIdDocumentType())
+                .orElseThrow(() -> new ResourceNotFoundException("El tipo de documento con id " + request.getIdDocumentType() + " no fue encontrado."));
+
+        PersonEntity personEntity = new PersonEntity();
+        personEntity.setFirstName(request.getFirstName());
+        personEntity.setLastName(request.getLastName());
+        personEntity.setEmail(request.getEmail());
+        personEntity.setPhone(request.getPhone());
+        personEntity.setAddress(request.getAddress());
+        personEntity.setDocumentType(documentTypeEntity);
+        personEntity.setDocumentNumber(request.getDocumentNumber());
+
+        PersonEntity savedPersonEntity = personRepository.save(personEntity);
+        return convertToDto(savedPersonEntity);
+    }
+}
