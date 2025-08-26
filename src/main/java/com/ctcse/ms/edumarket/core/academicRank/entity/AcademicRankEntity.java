@@ -15,8 +15,8 @@ public class AcademicRankEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "idAcademicRank")
-    public Long id;
+    private Long id;
 
     @Column(name = "description", nullable = false, length = 100)
-    public String description;
+    private String description;
 }

@@ -17,7 +17,7 @@ public class InstitutionTypeService {
     private final InstitutionTypeRepository repository;
 
     public List<InstitutionTypeDto> findAll() {
-        List< InstitutionTypeEntity> entities = repository.findAll();
+        List<InstitutionTypeEntity> entities = repository.findAll();
         return entities.stream()
                 .map(this::convertToDto)
                 .collect(Collectors.toList());
