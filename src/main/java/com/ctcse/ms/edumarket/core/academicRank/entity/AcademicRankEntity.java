@@ -1,4 +1,4 @@
-package com.ctcse.ms.edumarket.core.documentType.entity;
+package com.ctcse.ms.edumarket.core.academicRank.entity;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -6,17 +6,17 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Entity
-@Table(name = "document_type")
+@Table(name = "academic_rank")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class DocumentTypeEntity {
+public class AcademicRankEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "idDocumentType")
-    private Long id;
+    @Column(name = "idAcademicRank")
+    public Long id;
 
     @Column(name = "description", nullable = false, length = 100)
-    private String description;
+    public String description;
 }

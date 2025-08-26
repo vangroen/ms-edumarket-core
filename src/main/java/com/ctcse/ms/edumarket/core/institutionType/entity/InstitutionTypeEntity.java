@@ -13,7 +13,7 @@ import lombok.NoArgsConstructor;
 public class InstitutionTypeEntity {
 
     @Id
-    @GeneratedValue
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "idInstitutionType")
     private Long id;
 

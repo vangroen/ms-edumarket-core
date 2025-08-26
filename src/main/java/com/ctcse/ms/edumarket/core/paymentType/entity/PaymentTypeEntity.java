@@ -13,7 +13,7 @@ import lombok.NoArgsConstructor;
 public class PaymentTypeEntity {
 
     @Id
-    @GeneratedValue
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "idPaymentType")
     public Long id;
 
