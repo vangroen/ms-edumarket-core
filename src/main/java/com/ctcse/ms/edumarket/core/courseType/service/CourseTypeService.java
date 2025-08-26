@@ -22,17 +22,17 @@ public class CourseTypeService {
                 .collect(Collectors.toList());
     }
 
-    public CourseTypeDto create(CreateCourseTypeRequest request) {
-        CourseTypeEntity entity = new CourseTypeEntity();
-        entity.setDescription(request.getDescription());
-        CourseTypeEntity savedEntity = repository.save(entity);
-        return convertToDto(savedEntity);
-    }
-
     private CourseTypeDto convertToDto(CourseTypeEntity entity) {
         CourseTypeDto dto = new CourseTypeDto();
         dto.setId(entity.getId());
         dto.setDescription(entity.getDescription());
         return dto;
+    }
+
+    public CourseTypeDto create(CreateCourseTypeRequest request) {
+        CourseTypeEntity entity = new CourseTypeEntity();
+        entity.setDescription(request.getDescription());
+        CourseTypeEntity savedEntity = repository.save(entity);
+        return convertToDto(savedEntity);
     }
 }

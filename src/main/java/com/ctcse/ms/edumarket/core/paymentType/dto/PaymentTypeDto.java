@@ -5,6 +5,6 @@ import lombok.Data;
 @Data
 public class PaymentTypeDto {
 
-    public Long id;
-    public String description;
+    private Long id;
+    private String description;
 }

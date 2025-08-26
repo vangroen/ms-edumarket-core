@@ -1,9 +1,9 @@
-package com.ctcse.ms.edumarket.core.modality.dto;
+package com.ctcse.ms.edumarket.core.conceptType.dto;
 
 import lombok.Data;
 
 @Data
-public class ModalityDto {
+public class ConceptTypeDto {
 
     private Long id;
     private String description;
