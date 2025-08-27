@@ -1,5 +1,7 @@
 package com.ctcse.ms.edumarket.core.enrollment.service;
 
+import com.ctcse.ms.edumarket.core.academicRank.dto.AcademicRankDto;
+import com.ctcse.ms.edumarket.core.academicRank.entity.AcademicRankEntity;
 import com.ctcse.ms.edumarket.core.agent.dto.AgentDto;
 import com.ctcse.ms.edumarket.core.agent.entity.AgentEntity;
 import com.ctcse.ms.edumarket.core.agent.repository.AgentRepository;
@@ -22,6 +24,8 @@ import com.ctcse.ms.edumarket.core.modality.dto.ModalityDto;
 import com.ctcse.ms.edumarket.core.modality.entity.ModalityEntity;
 import com.ctcse.ms.edumarket.core.person.dto.PersonDto;
 import com.ctcse.ms.edumarket.core.person.entity.PersonEntity;
+import com.ctcse.ms.edumarket.core.profession.dto.ProfessionDto;
+import com.ctcse.ms.edumarket.core.profession.entity.ProfessionEntity;
 import com.ctcse.ms.edumarket.core.student.dto.StudentDto;
 import com.ctcse.ms.edumarket.core.student.entity.StudentEntity;
 import com.ctcse.ms.edumarket.core.student.repository.StudentRepository;
@@ -29,6 +33,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Instant;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -53,7 +58,7 @@ public class EnrollmentService {
         EnrollmentDto dto = new EnrollmentDto();
         dto.setId(entity.getId());
         dto.setTotalEnrollmentCost(entity.getTotalEnrollmentCost());
-        dto.setEnrollmentDate(entity.getEnrollmentDate());
+        dto.setEnrollmentDate(Instant.now());
 
         if (entity.getCourse() != null) {
             final var courseDto = getCourseDto(entity.getCourse());
@@ -169,6 +174,7 @@ public class EnrollmentService {
     }
 
     private StudentDto getStudentDto(StudentEntity student) {
+        if (student == null) return null;
         var studentDto = new StudentDto();
         studentDto.setId(student.getId());
 
@@ -179,7 +185,35 @@ public class EnrollmentService {
             studentDto.setPerson(personDto);
         }
 
+        if (student.getAcademicRank() != null) {
+            studentDto.setAcademicRank(getAcademicRankDto(student.getAcademicRank()));
+        }
+
+        if (student.getProfession() != null) {
+            studentDto.setProfession(getProfessionDto(student.getProfession()));
+        }
+
+        if (student.getInstitution() != null) {
+            studentDto.setInstitution(getInstitutionDto(student.getInstitution()));
+        }
+
         return studentDto;
+    }
+
+    private AcademicRankDto getAcademicRankDto(AcademicRankEntity academicRank) {
+        if (academicRank == null) return null;
+        var dto = new AcademicRankDto();
+        dto.setId(academicRank.getId());
+        dto.setDescription(academicRank.getDescription());
+        return dto;
+    }
+
+    private ProfessionDto getProfessionDto(ProfessionEntity profession) {
+        if (profession == null) return null;
+        var dto = new ProfessionDto();
+        dto.setId(profession.getId());
+        dto.setName(profession.getName());
+        return dto;
     }
 
     public EnrollmentDto create(CreateEnrollmentRequest request) {
@@ -194,7 +228,7 @@ public class EnrollmentService {
 
         EnrollmentEntity enrollmentEntity = new EnrollmentEntity();
         enrollmentEntity.setTotalEnrollmentCost(request.getTotalEnrollmentCost());
-        enrollmentEntity.setEnrollmentDate(request.getEnrollmentDate());
+        enrollmentEntity.setEnrollmentDate(Instant.now());
         enrollmentEntity.setStudent(studentEntity);
         enrollmentEntity.setAgent(agentEntity);
         enrollmentEntity.setCourse(courseEntity);
