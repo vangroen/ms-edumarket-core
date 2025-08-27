@@ -43,6 +43,7 @@ public class CourseService {
         CourseDto dto = new CourseDto();
         dto.setId(entity.getId());
         dto.setName(entity.getName());
+        dto.setCourseCost(entity.getCourseCost());
 
         if (entity.getCourseType() != null) {
             var courseTypeDto = new CourseTypeDto();

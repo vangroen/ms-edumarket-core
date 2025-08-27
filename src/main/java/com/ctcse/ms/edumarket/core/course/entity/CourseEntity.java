@@ -8,6 +8,8 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.math.BigDecimal;
+
 @Entity
 @Table(name = "course")
 @Data
@@ -22,6 +24,9 @@ public class CourseEntity {
 
     @Column(name = "name", nullable = false, unique = true, length = 100)
     private String name;
+
+    @Column(name = "courseCost", nullable = false)
+    private BigDecimal courseCost;
 
     @ManyToOne(optional = false)
     @JoinColumn(name = "idCourseType", nullable = false)

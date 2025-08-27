@@ -5,11 +5,14 @@ import com.ctcse.ms.edumarket.core.institution.dto.InstitutionDto;
 import com.ctcse.ms.edumarket.core.modality.dto.ModalityDto;
 import lombok.Data;
 
+import java.math.BigDecimal;
+
 @Data
 public class CourseDto {
 
     private Long id;
     private String name;
+    private BigDecimal courseCost;
     private CourseTypeDto courseType;
     private ModalityDto modality;
     private InstitutionDto institution;
