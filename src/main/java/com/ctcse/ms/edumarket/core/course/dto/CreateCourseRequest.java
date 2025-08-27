@@ -14,4 +14,8 @@ public class CreateCourseRequest {
     @NotBlankWithMessage(fieldName = "id del tipo de curso")
     @SizeWithMessage(fieldName = "id del tipo de curso", min = 2, max = 100)
     private Long idCourseType;
+
+    @NotBlankWithMessage(fieldName = "id de la modalidad")
+    @SizeWithMessage(fieldName = "id del tipo de curso", min = 2, max = 100)
+    private Long idModality;
 }
