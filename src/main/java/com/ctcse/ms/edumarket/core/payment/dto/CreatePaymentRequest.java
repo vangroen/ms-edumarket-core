@@ -21,6 +21,10 @@ public class CreatePaymentRequest {
     private Instant paymentDate;
 
     @NotBlankWithMessage(fieldName = "monto pagado")
-    @SizeWithMessage(fieldName = "tipo de pago", min = 3, max = 100)
+    @SizeWithMessage(fieldName = "tipo de pago", min = 1, max = 100)
     private Long idPaymentType;
+
+    @NotBlankWithMessage(fieldName = "cronograma de pagos")
+    @SizeWithMessage(fieldName = "cronograma de pagos", min = 1, max = 10000)
+    private Long idPaymentSchedule;
 }

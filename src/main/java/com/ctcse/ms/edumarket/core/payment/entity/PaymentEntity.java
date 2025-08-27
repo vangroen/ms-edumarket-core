@@ -1,5 +1,6 @@
 package com.ctcse.ms.edumarket.core.payment.entity;
 
+import com.ctcse.ms.edumarket.core.paymentSchedule.entity.PaymentScheduleEntity;
 import com.ctcse.ms.edumarket.core.paymentType.entity.PaymentTypeEntity;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -30,4 +31,8 @@ public class PaymentEntity {
     @ManyToOne(optional = false)
     @JoinColumn(name = "idPaymentType", nullable = false)
     private PaymentTypeEntity paymentType;
+
+    @ManyToOne(optional = false)
+    @JoinColumn(name = "idPaymentSchedule", nullable = false)
+    private PaymentScheduleEntity paymentSchedule;
 }
