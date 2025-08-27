@@ -12,7 +12,7 @@ public class CreateInstitutionRequest {
     @SizeWithMessage(fieldName = "nombre", min = 2, max = 100)
     private String name;
 
-    @NotBlankWithMessage(fieldName = "apellido")
-    @SizeWithMessage(fieldName = "apellido", min = 2, max = 100)
+    @NotBlankWithMessage(fieldName = "id del tipo de insitituto")
+    @SizeWithMessage(fieldName = "id del tipo de insitituto", min = 2, max = 100)
     private Long idInstitutionType;
 }
