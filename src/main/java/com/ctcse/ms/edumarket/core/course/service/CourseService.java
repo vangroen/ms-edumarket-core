@@ -79,6 +79,7 @@ public class CourseService {
 
             institutionDto.setInstitutionType(institutionTypeDto);
         }
+
         return institutionDto;
     }
 
@@ -90,10 +91,14 @@ public class CourseService {
         ModalityEntity modalityEntity = modalityRepository.findById(request.getIdModality())
                 .orElseThrow(() -> new ResourceNotFoundException("La modalidad con id " + request.getIdModality() + " no fue encontrado"));
 
+        InstitutionEntity institutionEntity = institutionRepository.findById(request.getIdInstitution())
+                .orElseThrow(() -> new ResourceNotFoundException("La institucion con id " + request.getIdInstitution() + " no fue encontrado"));
+
         CourseEntity courseEntity = new CourseEntity();
         courseEntity.setName(request.getName());
         courseEntity.setCourseType(courseTypeEntity);
         courseEntity.setModality(modalityEntity);
+        courseEntity.setInstitution(institutionEntity);
 
         CourseEntity savedCourseEntity = courseRepository.save(courseEntity);
 
