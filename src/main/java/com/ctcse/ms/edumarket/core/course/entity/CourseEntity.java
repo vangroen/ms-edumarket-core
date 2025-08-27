@@ -1,6 +1,7 @@
 package com.ctcse.ms.edumarket.core.course.entity;
 
 import com.ctcse.ms.edumarket.core.courseType.entity.CourseTypeEntity;
+import com.ctcse.ms.edumarket.core.institution.entity.InstitutionEntity;
 import com.ctcse.ms.edumarket.core.modality.entity.ModalityEntity;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -29,4 +30,8 @@ public class CourseEntity {
     @ManyToOne(optional = false)
     @JoinColumn(name = "idModality", nullable = false)
     private ModalityEntity modality;
+
+    @ManyToOne(optional = false)
+    @JoinColumn(name = "idInstitution", nullable = false)
+    private InstitutionEntity institution;
 }

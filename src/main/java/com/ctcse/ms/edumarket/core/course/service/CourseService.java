@@ -8,6 +8,10 @@ import com.ctcse.ms.edumarket.core.course.repository.CourseRepository;
 import com.ctcse.ms.edumarket.core.courseType.dto.CourseTypeDto;
 import com.ctcse.ms.edumarket.core.courseType.entity.CourseTypeEntity;
 import com.ctcse.ms.edumarket.core.courseType.repository.CourseTypeRepository;
+import com.ctcse.ms.edumarket.core.institution.dto.InstitutionDto;
+import com.ctcse.ms.edumarket.core.institution.entity.InstitutionEntity;
+import com.ctcse.ms.edumarket.core.institution.repository.InstitutionRepository;
+import com.ctcse.ms.edumarket.core.institutionType.dto.InstitutionTypeDto;
 import com.ctcse.ms.edumarket.core.modality.dto.ModalityDto;
 import com.ctcse.ms.edumarket.core.modality.entity.ModalityEntity;
 import com.ctcse.ms.edumarket.core.modality.repository.ModalityRepository;
@@ -25,6 +29,7 @@ public class CourseService {
     private final CourseRepository courseRepository;
     private final CourseTypeRepository courseTypeRepository;
     private final ModalityRepository modalityRepository;
+    private final InstitutionRepository institutionRepository;
 
     @Transactional(readOnly = true)
     public List<CourseDto> findAll() {
@@ -53,7 +58,28 @@ public class CourseService {
             dto.setModality(modalityDto);
         }
 
+        if (entity.getInstitution() != null) {
+            final var institutionDto = getInstitutionDto(entity.getInstitution());
+            dto.setInstitution(institutionDto);
+        }
+
         return dto;
+    }
+
+    private InstitutionDto getInstitutionDto(InstitutionEntity institution) {
+        var institutionDto = new InstitutionDto();
+        institutionDto.setId(institution.getId());
+        institutionDto.setName(institution.getName());
+
+        if (institution.getInstitutionType() != null) {
+            var institutionType = institution.getInstitutionType();
+            var institutionTypeDto = new InstitutionTypeDto();
+            institutionTypeDto.setId(institutionType.getId());
+            institutionTypeDto.setDescription(institutionType.getDescription());
+
+            institutionDto.setInstitutionType(institutionTypeDto);
+        }
+        return institutionDto;
     }
 
     @Transactional

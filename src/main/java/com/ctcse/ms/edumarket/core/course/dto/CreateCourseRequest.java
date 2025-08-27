@@ -12,10 +12,14 @@ public class CreateCourseRequest {
     private String name;
 
     @NotBlankWithMessage(fieldName = "id del tipo de curso")
-    @SizeWithMessage(fieldName = "id del tipo de curso", min = 2, max = 100)
+    @SizeWithMessage(fieldName = "id del tipo de curso", min = 1, max = 100)
     private Long idCourseType;
 
     @NotBlankWithMessage(fieldName = "id de la modalidad")
-    @SizeWithMessage(fieldName = "id del tipo de curso", min = 2, max = 100)
+    @SizeWithMessage(fieldName = "id del tipo de curso", min = 1, max = 100)
     private Long idModality;
+
+    @NotBlankWithMessage(fieldName = "id de la institucion")
+    @SizeWithMessage(fieldName = "id de la institucion", min = 1, max = 100)
+    private Long idInstitution;
 }
