@@ -57,7 +57,7 @@ public class AgentService {
         personDto.setDocumentNumber(person.getDocumentNumber());
 
         if (person.getDocumentType() != null) {
-            var documentType = new DocumentTypeDto();
+            var documentType = person.getDocumentType();
             var documentTypeDto = new DocumentTypeDto();
             documentTypeDto.setId(documentType.getId());
             documentTypeDto.setDescription(documentType.getDescription());
