@@ -2,6 +2,7 @@ package com.ctcse.ms.edumarket.core.academicRank.controller;
 
 import com.ctcse.ms.edumarket.core.academicRank.dto.AcademicRankDto;
 import com.ctcse.ms.edumarket.core.academicRank.dto.CreateAcademicRankRequest;
+import com.ctcse.ms.edumarket.core.academicRank.dto.UpdateAcademicRankRequest;
 import com.ctcse.ms.edumarket.core.academicRank.service.AcademicRankService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -28,5 +29,11 @@ public class AcademicRankController {
     public ResponseEntity<AcademicRankDto> create(@Valid @RequestBody CreateAcademicRankRequest request) {
         AcademicRankDto newDto = service.create(request);
         return new ResponseEntity<>(newDto, HttpStatus.CREATED);
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<AcademicRankDto> update(@PathVariable Long id, @Valid @RequestBody UpdateAcademicRankRequest request) {
+        AcademicRankDto updatedDto = service.update(id, request);
+        return ResponseEntity.ok(updatedDto);
     }
 }
