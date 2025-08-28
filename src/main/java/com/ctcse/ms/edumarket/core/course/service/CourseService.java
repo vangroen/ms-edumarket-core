@@ -97,6 +97,7 @@ public class CourseService {
 
         CourseEntity courseEntity = new CourseEntity();
         courseEntity.setName(request.getName());
+        courseEntity.setCourseCost(request.getCourseCost());
         courseEntity.setCourseType(courseTypeEntity);
         courseEntity.setModality(modalityEntity);
         courseEntity.setInstitution(institutionEntity);
