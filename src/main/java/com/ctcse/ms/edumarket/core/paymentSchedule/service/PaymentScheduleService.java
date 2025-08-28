@@ -73,6 +73,6 @@ public class PaymentScheduleService {
 
         PaymentScheduleEntity savedPaymentScheduleEntity = paymentScheduleRepository.save(paymentScheduleEntity);
 
-        return convertToDto(paymentScheduleEntity);
+        return convertToDto(savedPaymentScheduleEntity);
     }
 }
