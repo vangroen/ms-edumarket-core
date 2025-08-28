@@ -2,6 +2,7 @@ package com.ctcse.ms.edumarket.core.enrollment.controller;
 
 import com.ctcse.ms.edumarket.core.enrollment.dto.CreateEnrollmentRequest;
 import com.ctcse.ms.edumarket.core.enrollment.dto.EnrollmentDto;
+import com.ctcse.ms.edumarket.core.enrollment.dto.UpdateEnrollmentRequest;
 import com.ctcse.ms.edumarket.core.enrollment.service.EnrollmentService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -27,5 +28,10 @@ public class EnrollmentController {
     public ResponseEntity<EnrollmentDto> create(@Valid @RequestBody CreateEnrollmentRequest request) {
         EnrollmentDto newDto = service.create(request);
         return new ResponseEntity<>(newDto, HttpStatus.CREATED);
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<EnrollmentDto> update(@PathVariable Long id, @Valid @RequestBody UpdateEnrollmentRequest request) {
+        return ResponseEntity.ok(service.update(id, request));
     }
 }

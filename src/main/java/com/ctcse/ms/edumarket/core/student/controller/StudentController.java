@@ -2,6 +2,7 @@ package com.ctcse.ms.edumarket.core.student.controller;
 
 import com.ctcse.ms.edumarket.core.student.dto.CreateStudentRequest;
 import com.ctcse.ms.edumarket.core.student.dto.StudentDto;
+import com.ctcse.ms.edumarket.core.student.dto.UpdateStudentRequest;
 import com.ctcse.ms.edumarket.core.student.service.StudentService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -27,5 +28,10 @@ public class StudentController {
     public ResponseEntity<StudentDto> create(@Valid @RequestBody CreateStudentRequest request) {
         StudentDto newDto = service.create(request);
         return new ResponseEntity<>(newDto, HttpStatus.CREATED);
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<StudentDto> update(@PathVariable Long id, @Valid @RequestBody UpdateStudentRequest request) {
+        return ResponseEntity.ok(service.update(id, request));
     }
 }

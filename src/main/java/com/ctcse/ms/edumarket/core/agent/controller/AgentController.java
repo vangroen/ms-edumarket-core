@@ -2,6 +2,7 @@ package com.ctcse.ms.edumarket.core.agent.controller;
 
 import com.ctcse.ms.edumarket.core.agent.dto.AgentDto;
 import com.ctcse.ms.edumarket.core.agent.dto.CreateAgentRequest;
+import com.ctcse.ms.edumarket.core.agent.dto.UpdateAgentRequest;
 import com.ctcse.ms.edumarket.core.agent.service.AgentService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -27,5 +28,10 @@ public class AgentController {
     public ResponseEntity<AgentDto> create(@Valid @RequestBody CreateAgentRequest request) {
         AgentDto newDto = service.create(request);
         return new ResponseEntity<>(newDto, HttpStatus.CREATED);
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<AgentDto> update(@PathVariable Long id, @Valid @RequestBody UpdateAgentRequest request) {
+        return ResponseEntity.ok(service.update(id, request));
     }
 }

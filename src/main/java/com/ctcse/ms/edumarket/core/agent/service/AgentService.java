@@ -2,6 +2,7 @@ package com.ctcse.ms.edumarket.core.agent.service;
 
 import com.ctcse.ms.edumarket.core.agent.dto.AgentDto;
 import com.ctcse.ms.edumarket.core.agent.dto.CreateAgentRequest;
+import com.ctcse.ms.edumarket.core.agent.dto.UpdateAgentRequest;
 import com.ctcse.ms.edumarket.core.agent.entity.AgentEntity;
 import com.ctcse.ms.edumarket.core.agent.repository.AgentRepository;
 import com.ctcse.ms.edumarket.core.common.exception.ResourceNotFoundException;
@@ -79,5 +80,19 @@ public class AgentService {
         AgentEntity savedAgentEntity = agentRepository.save(agentEntity);
 
         return convertToDto(savedAgentEntity);
+    }
+
+    @Transactional
+    public AgentDto update(Long id, UpdateAgentRequest request) {
+        AgentEntity agentEntity = agentRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("El agente con id " + id + " no fue encontrado."));
+
+        PersonEntity personEntity = personRepository.findById(request.getIdPerson())
+                .orElseThrow(() -> new ResourceNotFoundException("La persona con id " + request.getIdPerson() + " no fue encontrada."));
+
+        agentEntity.setPerson(personEntity);
+
+        AgentEntity updatedAgent = agentRepository.save(agentEntity);
+        return convertToDto(updatedAgent);
     }
 }

@@ -18,6 +18,7 @@ import com.ctcse.ms.edumarket.core.profession.entity.ProfessionEntity;
 import com.ctcse.ms.edumarket.core.profession.repository.ProfessionRepository;
 import com.ctcse.ms.edumarket.core.student.dto.CreateStudentRequest;
 import com.ctcse.ms.edumarket.core.student.dto.StudentDto;
+import com.ctcse.ms.edumarket.core.student.dto.UpdateStudentRequest;
 import com.ctcse.ms.edumarket.core.student.entity.StudentEntity;
 import com.ctcse.ms.edumarket.core.student.repository.StudentRepository;
 import lombok.RequiredArgsConstructor;
@@ -138,5 +139,35 @@ public class StudentService {
         StudentEntity savedStudentEntity = studentRepository.save(studentEntity);
 
         return convertToDto(savedStudentEntity);
+    }
+
+    @Transactional
+    public StudentDto update(Long id, UpdateStudentRequest request) {
+        // 1. Buscar la entidad principal (Student)
+        StudentEntity studentEntity = studentRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("El estudiante con id " + id + " no fue encontrado."));
+
+        // 2. Buscar todas las entidades relacionadas
+        ProfessionEntity professionEntity = professionRepository.findById(request.getIdProfession())
+                .orElseThrow(() -> new ResourceNotFoundException("La profesión con id " + request.getIdProfession() + " no fue encontrada"));
+
+        InstitutionEntity institutionEntity = institutionRepository.findById(request.getIdInstitution())
+                .orElseThrow(() -> new ResourceNotFoundException("La institución con id " + request.getIdInstitution() + " no fue encontrada"));
+
+        AcademicRankEntity academicRankEntity = academicRankRepository.findById(request.getIdAcademicRank())
+                .orElseThrow(() -> new ResourceNotFoundException("El rango académico con id " + request.getIdAcademicRank() + " no fue encontrado"));
+
+        PersonEntity personEntity = personRepository.findById(request.getIdPerson())
+                .orElseThrow(() -> new ResourceNotFoundException("La persona con id " + request.getIdPerson() + " no fue encontrada"));
+
+        // 3. Actualizar las relaciones
+        studentEntity.setProfession(professionEntity);
+        studentEntity.setInstitution(institutionEntity);
+        studentEntity.setAcademicRank(academicRankEntity);
+        studentEntity.setPerson(personEntity);
+
+        // 4. Guardar y devolver
+        StudentEntity updatedEntity = studentRepository.save(studentEntity);
+        return convertToDto(updatedEntity);
     }
 }
