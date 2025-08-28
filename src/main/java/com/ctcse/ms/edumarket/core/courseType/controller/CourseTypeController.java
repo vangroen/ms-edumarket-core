@@ -2,6 +2,7 @@ package com.ctcse.ms.edumarket.core.courseType.controller;
 
 import com.ctcse.ms.edumarket.core.courseType.dto.CourseTypeDto;
 import com.ctcse.ms.edumarket.core.courseType.dto.CreateCourseTypeRequest;
+import com.ctcse.ms.edumarket.core.courseType.dto.UpdateCourseTypeRequest;
 import com.ctcse.ms.edumarket.core.courseType.service.CourseTypeService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -27,4 +28,10 @@ public class CourseTypeController {
     public ResponseEntity<CourseTypeDto> create(@Valid @RequestBody CreateCourseTypeRequest request) {
         return new ResponseEntity<>(service.create(request), HttpStatus.CREATED);
     }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<CourseTypeDto> update(@PathVariable Long id, @Valid @RequestBody UpdateCourseTypeRequest request) {
+        return ResponseEntity.ok(service.update(id, request));
+    }
+
 }

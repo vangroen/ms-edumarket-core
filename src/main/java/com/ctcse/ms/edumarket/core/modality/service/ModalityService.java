@@ -2,12 +2,15 @@ package com.ctcse.ms.edumarket.core.modality.service;
 
 
 
+import com.ctcse.ms.edumarket.core.common.exception.ResourceNotFoundException;
 import com.ctcse.ms.edumarket.core.modality.dto.CreateModalityRequest;
 import com.ctcse.ms.edumarket.core.modality.dto.ModalityDto;
+import com.ctcse.ms.edumarket.core.modality.dto.UpdateModalityRequest;
 import com.ctcse.ms.edumarket.core.modality.entity.ModalityEntity;
 import com.ctcse.ms.edumarket.core.modality.repository.ModalityRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -38,5 +41,16 @@ public class ModalityService {
 
         ModalityEntity saveEntity = repository.save(entity);
         return convertToDto(saveEntity);
+    }
+
+    @Transactional
+    public ModalityDto update(Long id, UpdateModalityRequest request) {
+        ModalityEntity entity = repository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("La modalidad con id " + id + " no fue encontrada."));
+
+        entity.setDescription(request.getDescription());
+        ModalityEntity updatedEntity = repository.save(entity);
+
+        return convertToDto(updatedEntity);
     }
 }

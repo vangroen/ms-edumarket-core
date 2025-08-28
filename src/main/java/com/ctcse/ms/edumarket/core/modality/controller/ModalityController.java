@@ -2,6 +2,7 @@ package com.ctcse.ms.edumarket.core.modality.controller;
 
 import com.ctcse.ms.edumarket.core.modality.dto.CreateModalityRequest;
 import com.ctcse.ms.edumarket.core.modality.dto.ModalityDto;
+import com.ctcse.ms.edumarket.core.modality.dto.UpdateModalityRequest;
 import com.ctcse.ms.edumarket.core.modality.service.ModalityService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -26,5 +27,10 @@ public class ModalityController {
     @PostMapping
     public ResponseEntity<ModalityDto> create(@Valid @RequestBody CreateModalityRequest request) {
         return new ResponseEntity<>(service.create(request), HttpStatus.CREATED);
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<ModalityDto> update(@PathVariable Long id, @Valid @RequestBody UpdateModalityRequest request) {
+        return ResponseEntity.ok(service.update(id, request));
     }
 }
