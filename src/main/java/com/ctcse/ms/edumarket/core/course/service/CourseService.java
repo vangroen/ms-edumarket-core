@@ -39,7 +39,7 @@ public class CourseService {
                 .collect(Collectors.toList());
     }
 
-    private CourseDto convertToDto(CourseEntity entity) {
+    public CourseDto convertToDto(CourseEntity entity) {
         CourseDto dto = new CourseDto();
         dto.setId(entity.getId());
         dto.setName(entity.getName());

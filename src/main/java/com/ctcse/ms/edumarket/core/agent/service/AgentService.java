@@ -34,7 +34,7 @@ public class AgentService {
                 .collect(Collectors.toList());
     }
 
-    private AgentDto convertToDto(AgentEntity entity) {
+    public AgentDto convertToDto(AgentEntity entity) {
         AgentDto dto = new AgentDto();
         dto.setId(entity.getId());
 

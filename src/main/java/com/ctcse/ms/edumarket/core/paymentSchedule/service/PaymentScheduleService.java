@@ -6,6 +6,7 @@ import com.ctcse.ms.edumarket.core.conceptType.entity.ConceptTypeEntity;
 import com.ctcse.ms.edumarket.core.conceptType.repository.ConceptTypeRepository;
 import com.ctcse.ms.edumarket.core.enrollment.dto.EnrollmentDto;
 import com.ctcse.ms.edumarket.core.enrollment.entity.EnrollmentEntity;
+import com.ctcse.ms.edumarket.core.enrollment.service.EnrollmentService;
 import com.ctcse.ms.edumarket.core.enrollment.repository.EnrollmentRepository;
 import com.ctcse.ms.edumarket.core.installmentStatus.dto.InstallmentStatusDto;
 import com.ctcse.ms.edumarket.core.installmentStatus.entity.InstallmentStatusEntity;
@@ -29,6 +30,7 @@ public class PaymentScheduleService {
     private final ConceptTypeRepository conceptTypeRepository;
     private final InstallmentStatusRepository installmentStatusRepository;
     private final EnrollmentRepository enrollmentRepository;
+    private final EnrollmentService enrollmentService; // Inyectar el nuevo servicio
 
     @Transactional(readOnly = true)
     public List<PaymentScheduleDto> findAll() {
@@ -59,9 +61,7 @@ public class PaymentScheduleService {
         }
 
         if (entity.getEnrollment() != null) {
-            var enrollmentDto = new EnrollmentDto();
-            enrollmentDto.setId(entity.getEnrollment().getId());
-            dto.setEnrollment(enrollmentDto);
+            dto.setEnrollment(enrollmentService.convertToDto(entity.getEnrollment())); // Delegar la conversión
         }
 
         return dto;

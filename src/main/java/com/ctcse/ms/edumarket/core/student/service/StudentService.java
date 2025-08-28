@@ -45,7 +45,7 @@ public class StudentService {
                 .collect(Collectors.toList());
     }
 
-    private StudentDto convertToDto(StudentEntity entity) {
+    public StudentDto convertToDto(StudentEntity entity) {
         StudentDto dto = new StudentDto();
         dto.setId(entity.getId());
 
