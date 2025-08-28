@@ -11,12 +11,8 @@ import java.time.Instant;
 @Data
 public class CreatePaymentRequest {
 
-    @NotBlankWithMessage(fieldName = "monto pagado")
-    @Size(message = "El monto pagado debe ser mayor a cero")
     private BigDecimal paymentAmount;
 
-    @NotBlankWithMessage(fieldName = "fecha de pago")
-    @Size(message = "La fecha debe ser una actual")
     private Instant paymentDate;
 
     private Long idPaymentType;

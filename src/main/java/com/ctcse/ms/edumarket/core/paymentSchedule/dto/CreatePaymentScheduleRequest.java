@@ -11,10 +11,8 @@ import java.time.Instant;
 @Data
 public class CreatePaymentScheduleRequest {
 
-    @NotBlankWithMessage(fieldName = "monto vencimiento de la cuota")
     private BigDecimal installmentAmount;
 
-    @NotBlankWithMessage(fieldName = "fecha de vencimiento de la cuota")
     private Instant installmentDueDate;
 
     private Long idConceptType;
