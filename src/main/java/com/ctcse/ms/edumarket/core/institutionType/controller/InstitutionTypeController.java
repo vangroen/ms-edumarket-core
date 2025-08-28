@@ -1,8 +1,8 @@
 package com.ctcse.ms.edumarket.core.institutionType.controller;
 
-import com.ctcse.ms.edumarket.core.documentType.dto.DocumentTypeDto;
 import com.ctcse.ms.edumarket.core.institutionType.dto.CreateInstitutionTypeRequest;
 import com.ctcse.ms.edumarket.core.institutionType.dto.InstitutionTypeDto;
+import com.ctcse.ms.edumarket.core.institutionType.dto.UpdateInstitutionTypeRequest;
 import com.ctcse.ms.edumarket.core.institutionType.service.InstitutionTypeService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -29,5 +29,11 @@ public class InstitutionTypeController {
     public ResponseEntity<InstitutionTypeDto> create(@Valid @RequestBody CreateInstitutionTypeRequest request) {
         InstitutionTypeDto newDto = service.create(request);
         return new ResponseEntity<>(newDto, HttpStatus.CREATED);
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<InstitutionTypeDto> update(@PathVariable Long id, @Valid @RequestBody UpdateInstitutionTypeRequest request) {
+        InstitutionTypeDto updatedDto = service.update(id, request);
+        return ResponseEntity.ok(updatedDto);
     }
 }
