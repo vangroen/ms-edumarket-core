@@ -1,11 +1,14 @@
 package com.ctcse.ms.edumarket.core.documentType.service;
 
+import com.ctcse.ms.edumarket.core.common.exception.ResourceNotFoundException;
 import com.ctcse.ms.edumarket.core.documentType.dto.CreateDocumentTypeRequest;
 import com.ctcse.ms.edumarket.core.documentType.dto.DocumentTypeDto;
+import com.ctcse.ms.edumarket.core.documentType.dto.UpdateDocumentTypeRequest;
 import com.ctcse.ms.edumarket.core.documentType.entity.DocumentTypeEntity;
 import com.ctcse.ms.edumarket.core.documentType.repository.DocumentTypeRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -36,5 +39,15 @@ public class DocumentTypeService {
 
         DocumentTypeEntity saveEntity = repository.save(entity);
         return convertToDto(saveEntity);
+    }
+
+    @Transactional
+    public DocumentTypeDto update(Long id, UpdateDocumentTypeRequest request) {
+        DocumentTypeEntity entity = repository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("El tipo de documento con id " + id + " no fue encontrado."));
+        entity.setDescription(request.getDescription());
+        DocumentTypeEntity updatedEntity = repository.save(entity);
+
+        return convertToDto(updatedEntity);
     }
 }

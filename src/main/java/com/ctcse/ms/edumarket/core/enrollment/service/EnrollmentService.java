@@ -29,12 +29,11 @@ public class EnrollmentService {
     private final EnrollmentRepository enrollmentRepository;
     private final StudentRepository studentRepository;
     private final AgentRepository agentRepository;
-    private final CourseRepository courseRepository; // NOTA: Asumo que este repositorio existe
+    private final CourseRepository courseRepository;
 
-    // Inyecta los servicios para delegar la conversión a DTO
     private final StudentService studentService;
     private final AgentService agentService;
-    private final CourseService courseService; // NOTA: Asumo que este servicio existe y tiene un método public convertToDto
+    private final CourseService courseService;
 
     @Transactional(readOnly = true)
     public List<EnrollmentDto> findAll() {
@@ -66,12 +65,7 @@ public class EnrollmentService {
         return convertToDto(savedEntity);
     }
 
-    /**
-     * Convierte una EnrollmentEntity a un EnrollmentDto con todos sus datos.
-     * @param entity La entidad a convertir.
-     * @return El DTO completo.
-     */
-    public EnrollmentDto convertToDto(EnrollmentEntity entity) { // Este método debe ser público para ser usado por PaymentScheduleService
+    public EnrollmentDto convertToDto(EnrollmentEntity entity) {
         if (entity == null) {
             return null;
         }
@@ -81,7 +75,6 @@ public class EnrollmentService {
         dto.setTotalEnrollmentCost(entity.getTotalEnrollmentCost());
         dto.setEnrollmentDate(entity.getEnrollmentDate());
 
-        // Delegar la conversión de los objetos anidados a sus respectivos servicios
         if (entity.getStudent() != null) {
             dto.setStudent(studentService.convertToDto(entity.getStudent()));
         }

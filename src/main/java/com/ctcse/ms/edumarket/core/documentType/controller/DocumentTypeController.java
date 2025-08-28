@@ -2,6 +2,7 @@ package com.ctcse.ms.edumarket.core.documentType.controller;
 
 import com.ctcse.ms.edumarket.core.documentType.dto.CreateDocumentTypeRequest;
 import com.ctcse.ms.edumarket.core.documentType.dto.DocumentTypeDto;
+import com.ctcse.ms.edumarket.core.documentType.dto.UpdateDocumentTypeRequest;
 import com.ctcse.ms.edumarket.core.documentType.service.DocumentTypeService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -28,5 +29,11 @@ public class DocumentTypeController {
     public ResponseEntity<DocumentTypeDto> create(@Valid @RequestBody CreateDocumentTypeRequest request) {
         DocumentTypeDto newDto = service.create(request);
         return new ResponseEntity<>(newDto, HttpStatus.CREATED);
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<DocumentTypeDto> update(@PathVariable Long id, @Valid @RequestBody UpdateDocumentTypeRequest request) {
+        DocumentTypeDto updatedDto = service.update(id, request);
+        return ResponseEntity.ok(updatedDto);
     }
 }
