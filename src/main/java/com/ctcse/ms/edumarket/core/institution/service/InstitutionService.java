@@ -3,6 +3,7 @@ package com.ctcse.ms.edumarket.core.institution.service;
 import com.ctcse.ms.edumarket.core.common.exception.ResourceNotFoundException;
 import com.ctcse.ms.edumarket.core.institution.dto.CreateInstitutionRequest;
 import com.ctcse.ms.edumarket.core.institution.dto.InstitutionDto;
+import com.ctcse.ms.edumarket.core.institution.dto.UpdateInstitutionRequest;
 import com.ctcse.ms.edumarket.core.institution.entity.InstitutionEntity;
 import com.ctcse.ms.edumarket.core.institution.repository.InstitutionRepository;
 import com.ctcse.ms.edumarket.core.institutionType.dto.InstitutionTypeDto;
@@ -58,4 +59,18 @@ public class InstitutionService {
         return convertToDto(savedInstitutionEntity);
     }
 
+    @Transactional
+    public InstitutionDto update(Long id, UpdateInstitutionRequest request) {
+        InstitutionEntity institutionEntity = institutionRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("La institución con id " + id + " no fue encontrada."));
+
+        InstitutionTypeEntity institutionTypeEntity = institutionTypeRepository.findById(request.getIdInstitutionType())
+                .orElseThrow(() -> new ResourceNotFoundException("El tipo de institución con id " + request.getIdInstitutionType() + " no fue encontrado."));
+
+        institutionEntity.setName(request.getName());
+        institutionEntity.setInstitutionType(institutionTypeEntity);
+
+        InstitutionEntity updatedEntity = institutionRepository.save(institutionEntity);
+        return convertToDto(updatedEntity);
+    }
 }
