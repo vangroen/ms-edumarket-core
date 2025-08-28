@@ -2,6 +2,7 @@ package com.ctcse.ms.edumarket.core.paymentType.controller;
 
 import com.ctcse.ms.edumarket.core.paymentType.dto.CreatePaymentTypeRequest;
 import com.ctcse.ms.edumarket.core.paymentType.dto.PaymentTypeDto;
+import com.ctcse.ms.edumarket.core.paymentType.dto.UpdatePaymentTypeRequest;
 import com.ctcse.ms.edumarket.core.paymentType.service.PaymentTypeService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -28,5 +29,10 @@ public class PaymentTypeController {
     public ResponseEntity<PaymentTypeDto> create(@Valid @RequestBody CreatePaymentTypeRequest request) {
         PaymentTypeDto newDto = service.create(request);
         return new ResponseEntity<>(newDto, HttpStatus.CREATED);
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<PaymentTypeDto> update(@PathVariable Long id, @Valid @RequestBody UpdatePaymentTypeRequest request) {
+        return ResponseEntity.ok(service.update(id, request));
     }
 }

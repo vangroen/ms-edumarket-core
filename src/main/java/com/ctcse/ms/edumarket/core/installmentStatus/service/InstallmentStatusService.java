@@ -1,12 +1,15 @@
 package com.ctcse.ms.edumarket.core.installmentStatus.service;
 
+import com.ctcse.ms.edumarket.core.common.exception.ResourceNotFoundException;
 import com.ctcse.ms.edumarket.core.installmentStatus.dto.CreateInstallmentStatusRequest;
 import com.ctcse.ms.edumarket.core.installmentStatus.dto.InstallmentStatusDto;
+import com.ctcse.ms.edumarket.core.installmentStatus.dto.UpdateInstallmentStatusRequest;
 import com.ctcse.ms.edumarket.core.installmentStatus.entity.InstallmentStatusEntity;
 import com.ctcse.ms.edumarket.core.installmentStatus.repository.InstallmentStatusRepository;
 import com.ctcse.ms.edumarket.core.institutionType.dto.CreateInstitutionTypeRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -35,5 +38,16 @@ public class InstallmentStatusService {
         entity.setStatus(request.getStatus());
         InstallmentStatusEntity savedEntity = repository.save(entity);
         return convertToDto(savedEntity);
+    }
+
+    @Transactional
+    public InstallmentStatusDto update(Long id, UpdateInstallmentStatusRequest request) {
+        InstallmentStatusEntity entity = repository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("El estado de cuota con id " + id + " no fue encontrado."));
+
+        entity.setStatus(request.getStatus());
+        InstallmentStatusEntity updatedEntity = repository.save(entity);
+
+        return convertToDto(updatedEntity);
     }
 }

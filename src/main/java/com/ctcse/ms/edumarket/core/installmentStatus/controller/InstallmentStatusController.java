@@ -2,6 +2,7 @@ package com.ctcse.ms.edumarket.core.installmentStatus.controller;
 
 import com.ctcse.ms.edumarket.core.installmentStatus.dto.CreateInstallmentStatusRequest;
 import com.ctcse.ms.edumarket.core.installmentStatus.dto.InstallmentStatusDto;
+import com.ctcse.ms.edumarket.core.installmentStatus.dto.UpdateInstallmentStatusRequest;
 import com.ctcse.ms.edumarket.core.installmentStatus.service.InstallmentStatusService;
 import jakarta.validation.Valid;
 import lombok.Data;
@@ -27,5 +28,10 @@ public class InstallmentStatusController {
     @PostMapping
     public ResponseEntity<InstallmentStatusDto> create(@Valid @RequestBody CreateInstallmentStatusRequest request) {
         return new ResponseEntity<>(service.create(request), HttpStatus.CREATED);
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<InstallmentStatusDto> update(@PathVariable Long id, @Valid @RequestBody UpdateInstallmentStatusRequest request) {
+        return ResponseEntity.ok(service.update(id, request));
     }
 }
