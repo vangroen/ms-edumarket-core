@@ -51,4 +51,19 @@ public class PaymentTypeService {
 
         return convertToDto(updatedEntity);
     }
+
+    @Transactional(readOnly = true)
+    public PaymentTypeDto findById(Long id) {
+        PaymentTypeEntity entity = repository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("El tipo de pago con id " + id + " no fue encontrado."));
+        return convertToDto(entity);
+    }
+
+    @Transactional
+    public void deleteById(Long id) {
+        if (!repository.existsById(id)) {
+            throw new ResourceNotFoundException("El tipo de pago con id " + id + " no fue encontrado.");
+        }
+        repository.deleteById(id);
+    }
 }

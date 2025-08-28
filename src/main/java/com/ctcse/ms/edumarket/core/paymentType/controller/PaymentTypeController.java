@@ -10,7 +10,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/v1/payment-type")
@@ -34,5 +36,20 @@ public class PaymentTypeController {
     @PutMapping("/{id}")
     public ResponseEntity<PaymentTypeDto> update(@PathVariable Long id, @Valid @RequestBody UpdatePaymentTypeRequest request) {
         return ResponseEntity.ok(service.update(id, request));
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<PaymentTypeDto> getById(@PathVariable Long id) {
+        return ResponseEntity.ok(service.findById(id));
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Map<String, String>> delete(@PathVariable Long id) {
+        service.deleteById(id);
+
+        Map<String, String> response = new HashMap<>();
+        response.put("message", "El tipo de pago con id " + id + " ha sido eliminado exitosamente.");
+
+        return ResponseEntity.ok(response);
     }
 }

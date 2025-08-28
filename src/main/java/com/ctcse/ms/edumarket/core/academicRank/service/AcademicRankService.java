@@ -51,4 +51,19 @@ public class AcademicRankService {
 
         return convertToDto(updatedEntity);
     }
+
+    @Transactional(readOnly = true)
+    public AcademicRankDto findById(Long id) {
+        AcademicRankEntity entity = repository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("El rango académico con id " + id + " no fue encontrado."));
+        return convertToDto(entity);
+    }
+
+    @Transactional
+    public void deleteById(Long id) {
+        if (!repository.existsById(id)) {
+            throw new ResourceNotFoundException("El rango académico con id " + id + " no fue encontrado.");
+        }
+        repository.deleteById(id);
+    }
 }
