@@ -1,16 +1,15 @@
 package com.ctcse.ms.edumarket.core.paymentSchedule.service;
 
 import com.ctcse.ms.edumarket.core.common.exception.ResourceNotFoundException;
-import com.ctcse.ms.edumarket.core.conceptType.dto.ConceptTypeDto;
+import com.ctcse.ms.edumarket.core.conceptType.service.ConceptTypeService;
 import com.ctcse.ms.edumarket.core.conceptType.entity.ConceptTypeEntity;
 import com.ctcse.ms.edumarket.core.conceptType.repository.ConceptTypeRepository;
-import com.ctcse.ms.edumarket.core.enrollment.dto.EnrollmentDto;
 import com.ctcse.ms.edumarket.core.enrollment.entity.EnrollmentEntity;
 import com.ctcse.ms.edumarket.core.enrollment.service.EnrollmentService;
 import com.ctcse.ms.edumarket.core.enrollment.repository.EnrollmentRepository;
-import com.ctcse.ms.edumarket.core.installmentStatus.dto.InstallmentStatusDto;
-import com.ctcse.ms.edumarket.core.installmentStatus.entity.InstallmentStatusEntity;
+import com.ctcse.ms.edumarket.core.installmentStatus.service.InstallmentStatusService;
 import com.ctcse.ms.edumarket.core.installmentStatus.repository.InstallmentStatusRepository;
+import com.ctcse.ms.edumarket.core.installmentStatus.entity.InstallmentStatusEntity;
 import com.ctcse.ms.edumarket.core.paymentSchedule.dto.CreatePaymentScheduleRequest;
 import com.ctcse.ms.edumarket.core.paymentSchedule.dto.PaymentScheduleDto;
 import com.ctcse.ms.edumarket.core.paymentSchedule.entity.PaymentScheduleEntity;
@@ -30,7 +29,9 @@ public class PaymentScheduleService {
     private final ConceptTypeRepository conceptTypeRepository;
     private final InstallmentStatusRepository installmentStatusRepository;
     private final EnrollmentRepository enrollmentRepository;
-    private final EnrollmentService enrollmentService; // Inyectar el nuevo servicio
+    private final EnrollmentService enrollmentService;
+    private final ConceptTypeService conceptTypeService;
+    private final InstallmentStatusService installmentStatusService;
 
     @Transactional(readOnly = true)
     public List<PaymentScheduleDto> findAll() {
@@ -40,24 +41,18 @@ public class PaymentScheduleService {
                 .collect(Collectors.toList());
     }
 
-    private PaymentScheduleDto convertToDto(PaymentScheduleEntity entity) {
+    public PaymentScheduleDto convertToDto(PaymentScheduleEntity entity) {
         PaymentScheduleDto dto = new PaymentScheduleDto();
         dto.setId(entity.getId());
         dto.setInstallmentAmount(entity.getInstallmentAmount());
         dto.setInstallmentDueDate(entity.getInstallmentDueDate());
 
         if (entity.getConceptType() != null) {
-            var conceptTypeDto = new ConceptTypeDto();
-            conceptTypeDto.setId(entity.getConceptType().getId());
-            conceptTypeDto.setDescription(entity.getConceptType().getDescription());
-            dto.setConceptType(conceptTypeDto);
+            dto.setConceptType(conceptTypeService.convertToDto(entity.getConceptType()));
         }
 
         if (entity.getInstallmentStatus() != null) {
-            var installmentStatusDto = new InstallmentStatusDto();
-            installmentStatusDto.setId(entity.getInstallmentStatus().getId());
-            installmentStatusDto.setStatus(entity.getInstallmentStatus().getStatus());
-            dto.setInstallmentStatus(installmentStatusDto);
+            dto.setInstallmentStatus(installmentStatusService.convertToDto(entity.getInstallmentStatus()));
         }
 
         if (entity.getEnrollment() != null) {

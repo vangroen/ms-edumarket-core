@@ -38,6 +38,6 @@ public class PaymentScheduleEntity {
     private InstallmentStatusEntity installmentStatus;
 
     @ManyToOne
-    @JoinColumn(name = "idEnrollment", nullable = false) // Esto creará la columna 'enrollment_id' en la BD
+    @JoinColumn(name = "idEnrollment", nullable = false)
     private EnrollmentEntity enrollment;
 }

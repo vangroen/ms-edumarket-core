@@ -1,15 +1,13 @@
 package com.ctcse.ms.edumarket.core.payment.service;
 
 import com.ctcse.ms.edumarket.core.common.exception.ResourceNotFoundException;
-import com.ctcse.ms.edumarket.core.conceptType.dto.ConceptTypeDto;
-import com.ctcse.ms.edumarket.core.installmentStatus.dto.InstallmentStatusDto;
 import com.ctcse.ms.edumarket.core.payment.dto.CreatePaymentRequest;
 import com.ctcse.ms.edumarket.core.payment.dto.PaymentDto;
 import com.ctcse.ms.edumarket.core.payment.entity.PaymentEntity;
 import com.ctcse.ms.edumarket.core.payment.repository.PaymentRepository;
-import com.ctcse.ms.edumarket.core.paymentSchedule.dto.PaymentScheduleDto;
 import com.ctcse.ms.edumarket.core.paymentSchedule.entity.PaymentScheduleEntity;
 import com.ctcse.ms.edumarket.core.paymentSchedule.repository.PaymentScheduleRepository;
+import com.ctcse.ms.edumarket.core.paymentSchedule.service.PaymentScheduleService;
 import com.ctcse.ms.edumarket.core.paymentType.dto.PaymentTypeDto;
 import com.ctcse.ms.edumarket.core.paymentType.entity.PaymentTypeEntity;
 import com.ctcse.ms.edumarket.core.paymentType.repository.PaymentTypeRepository;
@@ -27,6 +25,7 @@ public class PaymentService {
     private final PaymentRepository paymentRepository;
     private final PaymentTypeRepository paymentTypeRepository;
     private final PaymentScheduleRepository paymentScheduleRepository;
+    private final PaymentScheduleService paymentScheduleService;
 
     @Transactional(readOnly = true)
     public List<PaymentDto> findAll() {
@@ -50,38 +49,10 @@ public class PaymentService {
         }
 
         if (entity.getPaymentSchedule() != null) {
-            final var paymentScheduleDto = getPaymentScheduleDto(entity.getPaymentSchedule());
-            dto.setPaymentSchedule(paymentScheduleDto);
+            dto.setPaymentSchedule(paymentScheduleService.convertToDto(entity.getPaymentSchedule()));
         }
 
         return dto;
-    }
-
-    private PaymentScheduleDto getPaymentScheduleDto(PaymentScheduleEntity paymentSchedule) {
-        var paymentScheduleDto = new PaymentScheduleDto();
-        paymentScheduleDto.setId(paymentSchedule.getId());
-        paymentScheduleDto.setInstallmentAmount(paymentSchedule.getInstallmentAmount());
-        paymentScheduleDto.setInstallmentDueDate(paymentSchedule.getInstallmentDueDate());
-
-        if (paymentSchedule.getConceptType() != null) {
-            var conceptType = paymentSchedule.getConceptType();
-            var conceptTypeDto = new ConceptTypeDto();
-            conceptTypeDto.setId(conceptType.getId());
-            conceptTypeDto.setDescription(conceptType.getDescription());
-
-            paymentScheduleDto.setConceptType(conceptTypeDto);
-        }
-
-        if (paymentSchedule.getInstallmentStatus() != null) {
-            var installmentStatus = paymentSchedule.getInstallmentStatus();
-            var installmentStatusDto = new InstallmentStatusDto();
-            installmentStatusDto.setId(installmentStatus.getId());
-            installmentStatusDto.setStatus(installmentStatus.getStatus());
-
-            paymentScheduleDto.setInstallmentStatus(installmentStatusDto);
-        }
-
-        return paymentScheduleDto;
     }
 
     @Transactional

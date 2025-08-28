@@ -22,7 +22,7 @@ public class ConceptTypeService {
                 .collect(Collectors.toList());
     }
 
-    private ConceptTypeDto convertToDto(ConceptTypeEntity entity) {
+    public ConceptTypeDto convertToDto(ConceptTypeEntity entity) {
         ConceptTypeDto dto = new ConceptTypeDto();
         dto.setId(entity.getId());
         dto.setDescription(entity.getDescription());

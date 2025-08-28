@@ -23,7 +23,7 @@ public class InstallmentStatusService {
                 .collect(Collectors.toList());
     }
 
-    private InstallmentStatusDto convertToDto(InstallmentStatusEntity entity) {
+    public InstallmentStatusDto convertToDto(InstallmentStatusEntity entity) {
         InstallmentStatusDto dto = new InstallmentStatusDto();
         dto.setId(entity.getId());
         dto.setStatus(entity.getStatus());
