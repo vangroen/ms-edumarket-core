@@ -4,6 +4,9 @@ import com.ctcse.ms.edumarket.core.common.exception.ResourceNotFoundException;
 import com.ctcse.ms.edumarket.core.conceptType.dto.ConceptTypeDto;
 import com.ctcse.ms.edumarket.core.conceptType.entity.ConceptTypeEntity;
 import com.ctcse.ms.edumarket.core.conceptType.repository.ConceptTypeRepository;
+import com.ctcse.ms.edumarket.core.enrollment.dto.EnrollmentDto;
+import com.ctcse.ms.edumarket.core.enrollment.entity.EnrollmentEntity;
+import com.ctcse.ms.edumarket.core.enrollment.repository.EnrollmentRepository;
 import com.ctcse.ms.edumarket.core.installmentStatus.dto.InstallmentStatusDto;
 import com.ctcse.ms.edumarket.core.installmentStatus.entity.InstallmentStatusEntity;
 import com.ctcse.ms.edumarket.core.installmentStatus.repository.InstallmentStatusRepository;
@@ -25,6 +28,7 @@ public class PaymentScheduleService {
     private final PaymentScheduleRepository paymentScheduleRepository;
     private final ConceptTypeRepository conceptTypeRepository;
     private final InstallmentStatusRepository installmentStatusRepository;
+    private final EnrollmentRepository enrollmentRepository;
 
     @Transactional(readOnly = true)
     public List<PaymentScheduleDto> findAll() {
@@ -54,6 +58,12 @@ public class PaymentScheduleService {
             dto.setInstallmentStatus(installmentStatusDto);
         }
 
+        if (entity.getEnrollment() != null) {
+            var enrollmentDto = new EnrollmentDto();
+            enrollmentDto.setId(entity.getEnrollment().getId());
+            dto.setEnrollment(enrollmentDto);
+        }
+
         return dto;
     }
 
@@ -65,11 +75,15 @@ public class PaymentScheduleService {
         InstallmentStatusEntity installmentStatusEntity = installmentStatusRepository.findById(request.getIdInstallmentStatus())
                 .orElseThrow(() -> new ResourceNotFoundException("El estado de la cuota con id " + request.getIdInstallmentStatus() + "no fue encontrado"));
 
+        EnrollmentEntity enrollmentEntity = enrollmentRepository.findById(request.getIdEnrollment())
+                .orElseThrow(() -> new ResourceNotFoundException("La matrícula con id " + request.getIdEnrollment() + " no fue encontrada"));
+
         PaymentScheduleEntity paymentScheduleEntity = new PaymentScheduleEntity();
         paymentScheduleEntity.setInstallmentAmount(request.getInstallmentAmount());
         paymentScheduleEntity.setInstallmentDueDate(request.getInstallmentDueDate());
         paymentScheduleEntity.setConceptType(conceptTypeEntity);
         paymentScheduleEntity.setInstallmentStatus(installmentStatusEntity);
+        paymentScheduleEntity.setEnrollment(enrollmentEntity);
 
         PaymentScheduleEntity savedPaymentScheduleEntity = paymentScheduleRepository.save(paymentScheduleEntity);
 

@@ -1,6 +1,7 @@
 package com.ctcse.ms.edumarket.core.paymentSchedule.entity;
 
 import com.ctcse.ms.edumarket.core.conceptType.entity.ConceptTypeEntity;
+import com.ctcse.ms.edumarket.core.enrollment.entity.EnrollmentEntity;
 import com.ctcse.ms.edumarket.core.installmentStatus.entity.InstallmentStatusEntity;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -35,4 +36,8 @@ public class PaymentScheduleEntity {
     @ManyToOne(optional = false)
     @JoinColumn(name = "idInstallmentStatus", nullable = false)
     private InstallmentStatusEntity installmentStatus;
+
+    @ManyToOne
+    @JoinColumn(name = "idEnrollment", nullable = false) // Esto creará la columna 'enrollment_id' en la BD
+    private EnrollmentEntity enrollment;
 }

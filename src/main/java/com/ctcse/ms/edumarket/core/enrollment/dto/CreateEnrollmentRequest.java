@@ -14,12 +14,8 @@ import java.time.Instant;
 @Data
 public class CreateEnrollmentRequest {
 
-    @NotBlankWithMessage(fieldName = "costo de matrícula")
-    @Size(message = "El costo de matrícula debe ser mayor a cero")
     private BigDecimal totalEnrollmentCost;
 
-    @NotBlankWithMessage(fieldName = "fecha de matrícula")
-    @Size(message = "La fecha de matrícula debe ser una actual")
     private Instant enrollmentDate;
 
     private Long idStudent;

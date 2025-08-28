@@ -1,6 +1,7 @@
 package com.ctcse.ms.edumarket.core.paymentSchedule.dto;
 
 import com.ctcse.ms.edumarket.core.conceptType.dto.ConceptTypeDto;
+import com.ctcse.ms.edumarket.core.enrollment.dto.EnrollmentDto;
 import com.ctcse.ms.edumarket.core.installmentStatus.dto.InstallmentStatusDto;
 import lombok.Data;
 
@@ -15,4 +16,5 @@ public class PaymentScheduleDto {
     private Instant installmentDueDate;
     private ConceptTypeDto conceptType;
     private InstallmentStatusDto installmentStatus;
+    private EnrollmentDto enrollment;
 }

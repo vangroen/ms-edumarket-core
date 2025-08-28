@@ -17,4 +17,5 @@ public class CreatePaymentScheduleRequest {
 
     private Long idConceptType;
     private Long idInstallmentStatus;
+    private Long idEnrollment;
 }
