@@ -17,11 +17,6 @@ public class CreatePaymentScheduleRequest {
     @NotBlankWithMessage(fieldName = "fecha de vencimiento de la cuota")
     private Instant installmentDueDate;
 
-    @NotBlankWithMessage(fieldName = "id del tipo de concepto")
-    @SizeWithMessage(fieldName = "id del tipo de concepto", min = 1, max = 100)
     private Long idConceptType;
-
-    @NotBlankWithMessage(fieldName = "id del estado de la cuota")
-    @SizeWithMessage(fieldName = "id del estado de la cuota", min = 1, max = 100)
     private Long idInstallmentStatus;
 }

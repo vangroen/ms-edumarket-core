@@ -22,15 +22,7 @@ public class CreateEnrollmentRequest {
     @Size(message = "La fecha de matrícula debe ser una actual")
     private Instant enrollmentDate;
 
-    @NotBlankWithMessage(fieldName = "alumno")
-    @SizeWithMessage(fieldName = "alumno", min = 1, max = 100)
     private Long idStudent;
-
-    @NotBlankWithMessage(fieldName = "promotor")
-    @SizeWithMessage(fieldName = "promotor", min = 1, max = 100)
     private Long idAgent;
-
-    @NotBlankWithMessage(fieldName = "curso")
-    @SizeWithMessage(fieldName = "curso", min = 1, max = 100)
     private Long idCourse;
 }

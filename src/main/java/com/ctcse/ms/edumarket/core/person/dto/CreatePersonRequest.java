@@ -32,7 +32,5 @@ public class CreatePersonRequest {
     @Size(min = 3, max = 16, message = "El número de documento debe estar entre 3 y 16 caracteres")
     private String documentNumber;
 
-    @NotBlank(message = "El tipo de documento no puede estar vacío")
-    @Size(min = 3, max = 16, message = "El tipo de documento debe estar entre 3 y 16 caracteres")
     private Long idDocumentType;
 }
