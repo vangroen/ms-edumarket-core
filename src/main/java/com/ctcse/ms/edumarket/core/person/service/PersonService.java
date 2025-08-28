@@ -6,6 +6,7 @@ import com.ctcse.ms.edumarket.core.documentType.entity.DocumentTypeEntity;
 import com.ctcse.ms.edumarket.core.documentType.repository.DocumentTypeRepository;
 import com.ctcse.ms.edumarket.core.person.dto.CreatePersonRequest;
 import com.ctcse.ms.edumarket.core.person.dto.PersonDto;
+import com.ctcse.ms.edumarket.core.person.dto.UpdatePersonRequest;
 import com.ctcse.ms.edumarket.core.person.entity.PersonEntity;
 import com.ctcse.ms.edumarket.core.person.repository.PersonRepository;
 import org.springframework.transaction.annotation.Transactional;
@@ -66,5 +67,26 @@ public class PersonService {
 
         PersonEntity savedPersonEntity = personRepository.save(personEntity);
         return convertToDto(savedPersonEntity);
+    }
+
+    @Transactional
+    public PersonDto update(Long id, UpdatePersonRequest request) {
+        PersonEntity personEntity = personRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("La persona con id " + id + " no fue encontrada."));
+
+        DocumentTypeEntity documentTypeEntity = documentTypeRepository.findById(request.getIdDocumentType())
+                .orElseThrow(() -> new ResourceNotFoundException("El tipo de documento con id " + request.getIdDocumentType() + " no fue encontrado."));
+
+        // Actualizar todos los campos de la entidad
+        personEntity.setFirstName(request.getFirstName());
+        personEntity.setLastName(request.getLastName());
+        personEntity.setEmail(request.getEmail());
+        personEntity.setPhone(request.getPhone());
+        personEntity.setAddress(request.getAddress());
+        personEntity.setDocumentNumber(request.getDocumentNumber());
+        personEntity.setDocumentType(documentTypeEntity);
+
+        PersonEntity updatedEntity = personRepository.save(personEntity);
+        return convertToDto(updatedEntity);
     }
 }

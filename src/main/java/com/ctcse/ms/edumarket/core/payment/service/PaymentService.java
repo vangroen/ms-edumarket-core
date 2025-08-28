@@ -3,6 +3,7 @@ package com.ctcse.ms.edumarket.core.payment.service;
 import com.ctcse.ms.edumarket.core.common.exception.ResourceNotFoundException;
 import com.ctcse.ms.edumarket.core.payment.dto.CreatePaymentRequest;
 import com.ctcse.ms.edumarket.core.payment.dto.PaymentDto;
+import com.ctcse.ms.edumarket.core.payment.dto.UpdatePaymentRequest;
 import com.ctcse.ms.edumarket.core.payment.entity.PaymentEntity;
 import com.ctcse.ms.edumarket.core.payment.repository.PaymentRepository;
 import com.ctcse.ms.edumarket.core.paymentSchedule.entity.PaymentScheduleEntity;
@@ -71,5 +72,25 @@ public class PaymentService {
 
         PaymentEntity savedPaymentEntity = paymentRepository.save(paymentEntity);
         return convertToDto(savedPaymentEntity);
+    }
+
+    @Transactional
+    public PaymentDto update(Long id, UpdatePaymentRequest request) {
+        PaymentEntity paymentEntity = paymentRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("El pago con id " + id + " no fue encontrado."));
+
+        PaymentTypeEntity paymentTypeEntity = paymentTypeRepository.findById(request.getIdPaymentType())
+                .orElseThrow(() -> new ResourceNotFoundException("El tipo de pago con id " + request.getIdPaymentType() + " no fue encontrado."));
+
+        PaymentScheduleEntity paymentScheduleEntity = paymentScheduleRepository.findById(request.getIdPaymentSchedule())
+                .orElseThrow(() -> new ResourceNotFoundException("El cronograma de pago con id " + request.getIdPaymentSchedule() + " no fue encontrado."));
+
+        paymentEntity.setPaymentAmount(request.getPaymentAmount());
+        paymentEntity.setPaymentDate(request.getPaymentDate());
+        paymentEntity.setPaymentType(paymentTypeEntity);
+        paymentEntity.setPaymentSchedule(paymentScheduleEntity);
+
+        PaymentEntity updatedEntity = paymentRepository.save(paymentEntity);
+        return convertToDto(updatedEntity);
     }
 }

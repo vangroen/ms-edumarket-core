@@ -12,6 +12,7 @@ import com.ctcse.ms.edumarket.core.installmentStatus.repository.InstallmentStatu
 import com.ctcse.ms.edumarket.core.installmentStatus.entity.InstallmentStatusEntity;
 import com.ctcse.ms.edumarket.core.paymentSchedule.dto.CreatePaymentScheduleRequest;
 import com.ctcse.ms.edumarket.core.paymentSchedule.dto.PaymentScheduleDto;
+import com.ctcse.ms.edumarket.core.paymentSchedule.dto.UpdatePaymentScheduleRequest;
 import com.ctcse.ms.edumarket.core.paymentSchedule.entity.PaymentScheduleEntity;
 import com.ctcse.ms.edumarket.core.paymentSchedule.repository.PaymentScheduleRepository;
 import lombok.RequiredArgsConstructor;
@@ -83,5 +84,29 @@ public class PaymentScheduleService {
         PaymentScheduleEntity savedPaymentScheduleEntity = paymentScheduleRepository.save(paymentScheduleEntity);
 
         return convertToDto(savedPaymentScheduleEntity);
+    }
+
+    @Transactional
+    public PaymentScheduleDto update(Long id, UpdatePaymentScheduleRequest request) {
+        PaymentScheduleEntity scheduleEntity = paymentScheduleRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("El cronograma de pago con id " + id + " no fue encontrado."));
+
+        ConceptTypeEntity conceptTypeEntity = conceptTypeRepository.findById(request.getIdConceptType())
+                .orElseThrow(() -> new ResourceNotFoundException("El tipo de concepto con id " + request.getIdConceptType() + " no fue encontrado"));
+
+        InstallmentStatusEntity installmentStatusEntity = installmentStatusRepository.findById(request.getIdInstallmentStatus())
+                .orElseThrow(() -> new ResourceNotFoundException("El estado de la cuota con id " + request.getIdInstallmentStatus() + " no fue encontrado"));
+
+        EnrollmentEntity enrollmentEntity = enrollmentRepository.findById(request.getIdEnrollment())
+                .orElseThrow(() -> new ResourceNotFoundException("La matrícula con id " + request.getIdEnrollment() + " no fue encontrada"));
+
+        scheduleEntity.setInstallmentAmount(request.getInstallmentAmount());
+        scheduleEntity.setInstallmentDueDate(request.getInstallmentDueDate());
+        scheduleEntity.setConceptType(conceptTypeEntity);
+        scheduleEntity.setInstallmentStatus(installmentStatusEntity);
+        scheduleEntity.setEnrollment(enrollmentEntity);
+
+        PaymentScheduleEntity updatedEntity = paymentScheduleRepository.save(scheduleEntity);
+        return convertToDto(updatedEntity);
     }
 }

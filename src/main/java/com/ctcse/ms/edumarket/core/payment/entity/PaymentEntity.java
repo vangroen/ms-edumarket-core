@@ -22,10 +22,10 @@ public class PaymentEntity {
     @Column(name = "idPayment")
     private Long id;
 
-    @Column(name = "paymentAmount", nullable = false, unique = true)
+    @Column(name = "paymentAmount", nullable = false)
     private BigDecimal paymentAmount;
 
-    @Column(name = "paymentDate", nullable = false, unique = true)
+    @Column(name = "paymentDate", nullable = false)
     private Instant paymentDate;
 
     @ManyToOne(optional = false)
