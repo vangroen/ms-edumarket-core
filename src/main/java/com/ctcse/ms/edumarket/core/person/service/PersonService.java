@@ -77,7 +77,6 @@ public class PersonService {
         DocumentTypeEntity documentTypeEntity = documentTypeRepository.findById(request.getIdDocumentType())
                 .orElseThrow(() -> new ResourceNotFoundException("El tipo de documento con id " + request.getIdDocumentType() + " no fue encontrado."));
 
-        // Actualizar todos los campos de la entidad
         personEntity.setFirstName(request.getFirstName());
         personEntity.setLastName(request.getLastName());
         personEntity.setEmail(request.getEmail());

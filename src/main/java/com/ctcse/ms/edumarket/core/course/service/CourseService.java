@@ -3,6 +3,7 @@ package com.ctcse.ms.edumarket.core.course.service;
 import com.ctcse.ms.edumarket.core.common.exception.ResourceNotFoundException;
 import com.ctcse.ms.edumarket.core.course.dto.CourseDto;
 import com.ctcse.ms.edumarket.core.course.dto.CreateCourseRequest;
+import com.ctcse.ms.edumarket.core.course.dto.UpdateCourseRequest;
 import com.ctcse.ms.edumarket.core.course.entity.CourseEntity;
 import com.ctcse.ms.edumarket.core.course.repository.CourseRepository;
 import com.ctcse.ms.edumarket.core.courseType.dto.CourseTypeDto;
@@ -105,5 +106,29 @@ public class CourseService {
         CourseEntity savedCourseEntity = courseRepository.save(courseEntity);
 
         return convertToDto(savedCourseEntity);
+    }
+
+    @Transactional
+    public CourseDto update(Long id, UpdateCourseRequest request) {
+        CourseEntity courseEntity = courseRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("El curso con id " + id + " no fue encontrado."));
+
+        CourseTypeEntity courseTypeEntity = courseTypeRepository.findById(request.getIdCourseType())
+                .orElseThrow(() -> new ResourceNotFoundException("El tipo de curso con id " + request.getIdCourseType() + " no fue encontrado"));
+
+        ModalityEntity modalityEntity = modalityRepository.findById(request.getIdModality())
+                .orElseThrow(() -> new ResourceNotFoundException("La modalidad con id " + request.getIdModality() + " no fue encontrada"));
+
+        InstitutionEntity institutionEntity = institutionRepository.findById(request.getIdInstitution())
+                .orElseThrow(() -> new ResourceNotFoundException("La institución con id " + request.getIdInstitution() + " no fue encontrada"));
+
+        courseEntity.setName(request.getName());
+        courseEntity.setCourseCost(request.getCourseCost());
+        courseEntity.setCourseType(courseTypeEntity);
+        courseEntity.setModality(modalityEntity);
+        courseEntity.setInstitution(institutionEntity);
+
+        CourseEntity updatedEntity = courseRepository.save(courseEntity);
+        return convertToDto(updatedEntity);
     }
 }

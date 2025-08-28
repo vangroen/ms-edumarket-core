@@ -91,11 +91,9 @@ public class EnrollmentService {
 
     @Transactional
     public EnrollmentDto update(Long id, UpdateEnrollmentRequest request) {
-        // 1. Buscar la matrícula a actualizar
         EnrollmentEntity enrollmentEntity = enrollmentRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("La matrícula con id " + id + " no fue encontrada."));
 
-        // 2. Buscar las entidades relacionadas
         StudentEntity studentEntity = studentRepository.findById(request.getIdStudent())
                 .orElseThrow(() -> new ResourceNotFoundException("El estudiante con id " + request.getIdStudent() + " no fue encontrado"));
 
@@ -105,14 +103,12 @@ public class EnrollmentService {
         CourseEntity courseEntity = courseRepository.findById(request.getIdCourse())
                 .orElseThrow(() -> new ResourceNotFoundException("El curso con id " + request.getIdCourse() + " no fue encontrado"));
 
-        // 3. Actualizar los campos y relaciones
         enrollmentEntity.setTotalEnrollmentCost(request.getTotalEnrollmentCost());
         enrollmentEntity.setEnrollmentDate(request.getEnrollmentDate());
         enrollmentEntity.setStudent(studentEntity);
         enrollmentEntity.setAgent(agentEntity);
         enrollmentEntity.setCourse(courseEntity);
 
-        // 4. Guardar y devolver
         EnrollmentEntity updatedEntity = enrollmentRepository.save(enrollmentEntity);
         return convertToDto(updatedEntity);
     }

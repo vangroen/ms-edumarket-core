@@ -143,11 +143,9 @@ public class StudentService {
 
     @Transactional
     public StudentDto update(Long id, UpdateStudentRequest request) {
-        // 1. Buscar la entidad principal (Student)
         StudentEntity studentEntity = studentRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("El estudiante con id " + id + " no fue encontrado."));
 
-        // 2. Buscar todas las entidades relacionadas
         ProfessionEntity professionEntity = professionRepository.findById(request.getIdProfession())
                 .orElseThrow(() -> new ResourceNotFoundException("La profesión con id " + request.getIdProfession() + " no fue encontrada"));
 
@@ -160,13 +158,11 @@ public class StudentService {
         PersonEntity personEntity = personRepository.findById(request.getIdPerson())
                 .orElseThrow(() -> new ResourceNotFoundException("La persona con id " + request.getIdPerson() + " no fue encontrada"));
 
-        // 3. Actualizar las relaciones
         studentEntity.setProfession(professionEntity);
         studentEntity.setInstitution(institutionEntity);
         studentEntity.setAcademicRank(academicRankEntity);
         studentEntity.setPerson(personEntity);
 
-        // 4. Guardar y devolver
         StudentEntity updatedEntity = studentRepository.save(studentEntity);
         return convertToDto(updatedEntity);
     }

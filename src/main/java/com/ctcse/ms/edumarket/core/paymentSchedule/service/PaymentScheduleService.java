@@ -57,7 +57,7 @@ public class PaymentScheduleService {
         }
 
         if (entity.getEnrollment() != null) {
-            dto.setEnrollment(enrollmentService.convertToDto(entity.getEnrollment())); // Delegar la conversión
+            dto.setEnrollment(enrollmentService.convertToDto(entity.getEnrollment()));
         }
 
         return dto;
