@@ -109,4 +109,20 @@ public class PaymentScheduleService {
         PaymentScheduleEntity updatedEntity = paymentScheduleRepository.save(scheduleEntity);
         return convertToDto(updatedEntity);
     }
+
+    @Transactional(readOnly = true)
+    public PaymentScheduleDto findById(Long id) {
+        PaymentScheduleEntity entity = paymentScheduleRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("El cronograma de pago con id " + id + " no fue encontrado."));
+        return convertToDto(entity);
+    }
+
+    // --- MÉTODO NUEVO: ELIMINAR ---
+    @Transactional
+    public void deleteById(Long id) {
+        if (!paymentScheduleRepository.existsById(id)) {
+            throw new ResourceNotFoundException("El cronograma de pago con id " + id + " no fue encontrado.");
+        }
+        paymentScheduleRepository.deleteById(id);
+    }
 }

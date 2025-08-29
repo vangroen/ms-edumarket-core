@@ -73,4 +73,19 @@ public class InstitutionService {
         InstitutionEntity updatedEntity = institutionRepository.save(institutionEntity);
         return convertToDto(updatedEntity);
     }
+
+    @Transactional(readOnly = true)
+    public InstitutionDto findById(Long id) {
+        InstitutionEntity entity = institutionRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("La institución con id " + id + " no fue encontrada."));
+        return convertToDto(entity);
+    }
+
+    @Transactional
+    public void deleteById(Long id) {
+        if (!institutionRepository.existsById(id)) {
+            throw new ResourceNotFoundException("La institución con id " + id + " no fue encontrada.");
+        }
+        institutionRepository.deleteById(id);
+    }
 }

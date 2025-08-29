@@ -93,4 +93,19 @@ public class PaymentService {
         PaymentEntity updatedEntity = paymentRepository.save(paymentEntity);
         return convertToDto(updatedEntity);
     }
+
+    @Transactional(readOnly = true)
+    public PaymentDto findById(Long id) {
+        PaymentEntity entity = paymentRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("El pago con id " + id + " no fue encontrado."));
+        return convertToDto(entity);
+    }
+
+    @Transactional
+    public void deleteById(Long id) {
+        if (!paymentRepository.existsById(id)) {
+            throw new ResourceNotFoundException("El pago con id " + id + " no fue encontrado.");
+        }
+        paymentRepository.deleteById(id);
+    }
 }

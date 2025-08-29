@@ -10,7 +10,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/v1/payments")
@@ -33,5 +35,18 @@ public class PaymentController {
     @PutMapping("/{id}")
     public ResponseEntity<PaymentDto> update(@PathVariable Long id, @Valid @RequestBody UpdatePaymentRequest request) {
         return ResponseEntity.ok(service.update(id, request));
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<PaymentDto> getById(@PathVariable Long id) {
+        return ResponseEntity.ok(service.findById(id));
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Map<String, String>> delete(@PathVariable Long id) {
+        service.deleteById(id);
+        Map<String, String> response = new HashMap<>();
+        response.put("message", "El pago con id " + id + " ha sido eliminado exitosamente.");
+        return ResponseEntity.ok(response);
     }
 }

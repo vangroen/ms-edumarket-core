@@ -88,4 +88,19 @@ public class PersonService {
         PersonEntity updatedEntity = personRepository.save(personEntity);
         return convertToDto(updatedEntity);
     }
+
+    @Transactional(readOnly = true)
+    public PersonDto findById(Long id) {
+        PersonEntity personEntity = personRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("La persona con id " + id + " no fue encontrada."));
+        return convertToDto(personEntity);
+    }
+
+    @Transactional
+    public void deleteById(Long id) {
+        if (!personRepository.existsById(id)) {
+            throw new ResourceNotFoundException("La persona con id " + id + " no fue encontrada.");
+        }
+        personRepository.deleteById(id);
+    }
 }
