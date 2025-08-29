@@ -95,4 +95,19 @@ public class AgentService {
         AgentEntity updatedAgent = agentRepository.save(agentEntity);
         return convertToDto(updatedAgent);
     }
+
+    @Transactional(readOnly = true)
+    public AgentDto findById(Long id) {
+        AgentEntity agentEntity = agentRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("El agente con id " + id + " no fue encontrado."));
+        return convertToDto(agentEntity);
+    }
+
+    @Transactional
+    public void deleteById(Long id) {
+        if (!agentRepository.existsById(id)) {
+            throw new ResourceNotFoundException("El agente con id " + id + " no fue encontrado.");
+        }
+        agentRepository.deleteById(id);
+    }
 }

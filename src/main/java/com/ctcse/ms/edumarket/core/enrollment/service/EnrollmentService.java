@@ -112,4 +112,19 @@ public class EnrollmentService {
         EnrollmentEntity updatedEntity = enrollmentRepository.save(enrollmentEntity);
         return convertToDto(updatedEntity);
     }
+
+    @Transactional(readOnly = true)
+    public EnrollmentDto findById(Long id) {
+        EnrollmentEntity entity = enrollmentRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("La matrícula con id " + id + " no fue encontrada."));
+        return convertToDto(entity);
+    }
+
+    @Transactional
+    public void deleteById(Long id) {
+        if (!enrollmentRepository.existsById(id)) {
+            throw new ResourceNotFoundException("La matrícula con id " + id + " no fue encontrada.");
+        }
+        enrollmentRepository.deleteById(id);
+    }
 }

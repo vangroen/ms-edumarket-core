@@ -166,4 +166,19 @@ public class StudentService {
         StudentEntity updatedEntity = studentRepository.save(studentEntity);
         return convertToDto(updatedEntity);
     }
+
+    @Transactional(readOnly = true)
+    public StudentDto findById(Long id) {
+        StudentEntity entity = studentRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("El estudiante con id " + id + " no fue encontrado."));
+        return convertToDto(entity);
+    }
+
+    @Transactional
+    public void deleteById(Long id) {
+        if (!studentRepository.existsById(id)) {
+            throw new ResourceNotFoundException("El estudiante con id " + id + " no fue encontrado.");
+        }
+        studentRepository.deleteById(id);
+    }
 }

@@ -50,4 +50,19 @@ public class DocumentTypeService {
 
         return convertToDto(updatedEntity);
     }
+
+    @Transactional(readOnly = true)
+    public DocumentTypeDto findById(Long id) {
+        DocumentTypeEntity entity = repository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("El tipo de documento con id " + id + " no fue encontrado."));
+        return convertToDto(entity);
+    }
+
+    @Transactional
+    public void deleteById(Long id) {
+        if (!repository.existsById(id)) {
+            throw new ResourceNotFoundException("El tipo de documento con id " + id + " no fue encontrado.");
+        }
+        repository.deleteById(id);
+    }
 }

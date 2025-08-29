@@ -53,4 +53,19 @@ public class ModalityService {
 
         return convertToDto(updatedEntity);
     }
+
+    @Transactional(readOnly = true)
+    public ModalityDto findById(Long id) {
+        ModalityEntity entity = repository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("La modalidad con id " + id + " no fue encontrada."));
+        return convertToDto(entity);
+    }
+
+    @Transactional
+    public void deleteById(Long id) {
+        if (!repository.existsById(id)) {
+            throw new ResourceNotFoundException("La modalidad con id " + id + " no fue encontrada.");
+        }
+        repository.deleteById(id);
+    }
 }

@@ -10,7 +10,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/v1/document-type")
@@ -35,5 +37,18 @@ public class DocumentTypeController {
     public ResponseEntity<DocumentTypeDto> update(@PathVariable Long id, @Valid @RequestBody UpdateDocumentTypeRequest request) {
         DocumentTypeDto updatedDto = service.update(id, request);
         return ResponseEntity.ok(updatedDto);
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<DocumentTypeDto> getById(@PathVariable Long id) {
+        return ResponseEntity.ok(service.findById(id));
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Map<String, String>> delete(@PathVariable Long id) {
+        service.deleteById(id);
+        Map<String, String> response = new HashMap<>();
+        response.put("message", "El tipo de documento con id " + id + " ha sido eliminado exitosamente.");
+        return ResponseEntity.ok(response);
     }
 }

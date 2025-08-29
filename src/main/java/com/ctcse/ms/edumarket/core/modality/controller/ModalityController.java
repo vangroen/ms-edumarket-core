@@ -10,7 +10,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/v1/modality")
@@ -32,5 +34,19 @@ public class ModalityController {
     @PutMapping("/{id}")
     public ResponseEntity<ModalityDto> update(@PathVariable Long id, @Valid @RequestBody UpdateModalityRequest request) {
         return ResponseEntity.ok(service.update(id, request));
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<ModalityDto> getById(@PathVariable Long id) {
+        return ResponseEntity.ok(service.findById(id));
+    }
+
+    // --- ENDPOINT NUEVO: ELIMINAR (CON MENSAJE DE ÉXITO) ---
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Map<String, String>> delete(@PathVariable Long id) {
+        service.deleteById(id);
+        Map<String, String> response = new HashMap<>();
+        response.put("message", "La modalidad con id " + id + " ha sido eliminada exitosamente.");
+        return ResponseEntity.ok(response);
     }
 }

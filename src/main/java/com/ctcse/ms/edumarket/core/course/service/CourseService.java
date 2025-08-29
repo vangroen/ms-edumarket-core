@@ -131,4 +131,19 @@ public class CourseService {
         CourseEntity updatedEntity = courseRepository.save(courseEntity);
         return convertToDto(updatedEntity);
     }
+
+    @Transactional(readOnly = true)
+    public CourseDto findById(Long id) {
+        CourseEntity courseEntity = courseRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("El curso con id " + id + " no fue encontrado."));
+        return convertToDto(courseEntity);
+    }
+
+    @Transactional
+    public void deleteById(Long id) {
+        if (!courseRepository.existsById(id)) {
+            throw new ResourceNotFoundException("El curso con id " + id + " no fue encontrado.");
+        }
+        courseRepository.deleteById(id);
+    }
 }
