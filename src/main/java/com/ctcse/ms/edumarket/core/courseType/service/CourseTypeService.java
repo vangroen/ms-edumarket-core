@@ -49,4 +49,19 @@ public class CourseTypeService {
 
         return convertToDto(updatedEntity);
     }
+
+    @Transactional(readOnly = true)
+    public CourseTypeDto findById(Long id) {
+        CourseTypeEntity entity = repository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("El tipo de curso con id " + id + " no fue encontrado."));
+        return convertToDto(entity);
+    }
+
+    @Transactional
+    public void deleteById(Long id) {
+        if (!repository.existsById(id)) {
+            throw new ResourceNotFoundException("El tipo de curso con id " + id + " no fue encontrado.");
+        }
+        repository.deleteById(id);
+    }
 }

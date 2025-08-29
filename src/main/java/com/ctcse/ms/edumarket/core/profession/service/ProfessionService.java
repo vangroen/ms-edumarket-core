@@ -51,4 +51,19 @@ public class ProfessionService {
 
         return convertToDto(updatedEntity);
     }
+
+    @Transactional(readOnly = true)
+    public ProfessionDto findById(Long id) {
+        ProfessionEntity entity = repository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("La profesión con id " + id + " no fue encontrada."));
+        return convertToDto(entity);
+    }
+
+    @Transactional
+    public void deleteById(Long id) {
+        if (!repository.existsById(id)) {
+            throw new ResourceNotFoundException("La profesión con id " + id + " no fue encontrada.");
+        }
+        repository.deleteById(id);
+    }
 }

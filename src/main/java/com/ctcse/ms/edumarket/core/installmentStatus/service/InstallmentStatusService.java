@@ -50,4 +50,19 @@ public class InstallmentStatusService {
 
         return convertToDto(updatedEntity);
     }
+
+    @Transactional(readOnly = true)
+    public InstallmentStatusDto findById(Long id) {
+        InstallmentStatusEntity entity = repository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("El estado de cuota con id " + id + " no fue encontrado."));
+        return convertToDto(entity);
+    }
+
+    @Transactional
+    public void deleteById(Long id) {
+        if (!repository.existsById(id)) {
+            throw new ResourceNotFoundException("El estado de cuota con id " + id + " no fue encontrado.");
+        }
+        repository.deleteById(id);
+    }
 }
