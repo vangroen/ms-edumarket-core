@@ -1,10 +1,11 @@
 package com.ctcse.ms.edumarket.core.institution.entity;
 
+import com.ctcse.ms.edumarket.core.course.entity.CourseInstitutionEntity;
 import com.ctcse.ms.edumarket.core.institutionType.entity.InstitutionTypeEntity;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
+
+import java.util.Set;
 
 @Entity
 @Table(name = "institution")
@@ -24,4 +25,9 @@ public class InstitutionEntity {
     @ManyToOne(optional = false)
     @JoinColumn(name = "idInstitutionType", nullable = false)
     private InstitutionTypeEntity institutionType;
+
+    @OneToMany(mappedBy = "institution", cascade = CascadeType.ALL, orphanRemoval = true)
+    @EqualsAndHashCode.Exclude
+    @ToString.Exclude
+    private Set<CourseInstitutionEntity> courses;
 }

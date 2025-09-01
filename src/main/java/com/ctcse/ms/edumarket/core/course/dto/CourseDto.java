@@ -1,7 +1,7 @@
 package com.ctcse.ms.edumarket.core.course.dto;
 
 import com.ctcse.ms.edumarket.core.courseType.dto.CourseTypeDto;
-import com.ctcse.ms.edumarket.core.institution.dto.InstitutionDto;
+import com.ctcse.ms.edumarket.core.institution.dto.InstitutionPriceDto;
 import com.ctcse.ms.edumarket.core.modality.dto.ModalityDto;
 import lombok.Data;
 
@@ -13,8 +13,7 @@ public class CourseDto {
 
     private Long id;
     private String name;
-    private BigDecimal courseCost;
     private CourseTypeDto courseType;
     private ModalityDto modality;
-    private List<InstitutionDto> institutions;
+    private List<InstitutionPriceDto> institutions;
 }

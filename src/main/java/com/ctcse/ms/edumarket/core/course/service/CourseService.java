@@ -1,16 +1,19 @@
 package com.ctcse.ms.edumarket.core.course.service;
 
+
 import com.ctcse.ms.edumarket.core.common.exception.ResourceNotFoundException;
 import com.ctcse.ms.edumarket.core.course.dto.CourseDto;
-import com.ctcse.ms.edumarket.core.course.dto.CourseWithInstitutionsDto;
 import com.ctcse.ms.edumarket.core.course.dto.CreateCourseRequest;
 import com.ctcse.ms.edumarket.core.course.dto.UpdateCourseRequest;
 import com.ctcse.ms.edumarket.core.course.entity.CourseEntity;
+import com.ctcse.ms.edumarket.core.course.entity.CourseInstitutionEntity;
+import com.ctcse.ms.edumarket.core.course.entity.CourseInstitutionId;
 import com.ctcse.ms.edumarket.core.course.repository.CourseRepository;
 import com.ctcse.ms.edumarket.core.courseType.dto.CourseTypeDto;
 import com.ctcse.ms.edumarket.core.courseType.entity.CourseTypeEntity;
 import com.ctcse.ms.edumarket.core.courseType.repository.CourseTypeRepository;
 import com.ctcse.ms.edumarket.core.institution.dto.InstitutionDto;
+import com.ctcse.ms.edumarket.core.institution.dto.InstitutionPriceDto;
 import com.ctcse.ms.edumarket.core.institution.entity.InstitutionEntity;
 import com.ctcse.ms.edumarket.core.institution.repository.InstitutionRepository;
 import com.ctcse.ms.edumarket.core.institutionType.dto.InstitutionTypeDto;
@@ -47,7 +50,6 @@ public class CourseService {
         CourseDto dto = new CourseDto();
         dto.setId(entity.getId());
         dto.setName(entity.getName());
-        dto.setCourseCost(entity.getCourseCost());
 
         if (entity.getCourseType() != null) {
             var courseTypeDto = new CourseTypeDto();
@@ -63,8 +65,13 @@ public class CourseService {
             dto.setModality(modalityDto);
         }
 
-        List<InstitutionDto> institutionDtos = entity.getInstitutions().stream()
-                .map(this::getInstitutionDto)
+        List<InstitutionPriceDto> institutionDtos = entity.getInstitutions().stream()
+                .map(courseInstitution -> {
+                    InstitutionPriceDto institutionPriceDto = new InstitutionPriceDto();
+                    institutionPriceDto.setPrice(courseInstitution.getPrice());
+                    institutionPriceDto.setInstitution(getInstitutionDto(courseInstitution.getInstitution()));
+                    return institutionPriceDto;
+                })
                 .collect(Collectors.toList());
         dto.setInstitutions(institutionDtos);
 
@@ -96,22 +103,32 @@ public class CourseService {
         ModalityEntity modalityEntity = modalityRepository.findById(request.getIdModality())
                 .orElseThrow(() -> new ResourceNotFoundException("La modalidad con id " + request.getIdModality() + " no fue encontrado"));
 
-        Set<Long> uniqueInstitutionIds = new HashSet<>(request.getIdInstitutions());
-
-        List<InstitutionEntity> institutions = institutionRepository.findAllById(uniqueInstitutionIds);
-        if (institutions.size() != uniqueInstitutionIds.size()) {
-            throw new ResourceNotFoundException("Una o más instituciones no fueron encontradas.");
-        }
-
         CourseEntity courseEntity = new CourseEntity();
         courseEntity.setName(request.getName());
-        courseEntity.setCourseCost(request.getCourseCost());
         courseEntity.setCourseType(courseTypeEntity);
         courseEntity.setModality(modalityEntity);
-        courseEntity.setInstitutions(new HashSet<>(institutions));
 
+        // Guardamos el curso primero para obtener un ID
         CourseEntity savedCourseEntity = courseRepository.save(courseEntity);
-        return convertToDto(savedCourseEntity);
+
+
+        Set<CourseInstitutionEntity> courseInstitutions = new HashSet<>();
+        for (InstitutionPriceDto inst : request.getInstitutions()) {
+            InstitutionEntity institutionEntity = institutionRepository.findById(inst.getInstitution().getId())
+                    .orElseThrow(() -> new ResourceNotFoundException("Institución no encontrada"));
+
+            CourseInstitutionEntity courseInstitution = new CourseInstitutionEntity();
+            courseInstitution.setCourse(savedCourseEntity);
+            courseInstitution.setInstitution(institutionEntity);
+            courseInstitution.setPrice(inst.getPrice());
+            courseInstitution.setId(new CourseInstitutionId(savedCourseEntity.getId(), institutionEntity.getId()));
+            courseInstitutions.add(courseInstitution);
+        }
+
+        savedCourseEntity.setInstitutions(courseInstitutions);
+
+
+        return convertToDto(courseRepository.save(savedCourseEntity));
     }
 
     @Transactional
@@ -125,19 +142,26 @@ public class CourseService {
         ModalityEntity modalityEntity = modalityRepository.findById(request.getIdModality())
                 .orElseThrow(() -> new ResourceNotFoundException("La modalidad con id " + request.getIdModality() + " no fue encontrado"));
 
-        Set<Long> uniqueInstitutionIds = new HashSet<>(request.getIdInstitutions());
-
-        List<InstitutionEntity> institutions = institutionRepository.findAllById(uniqueInstitutionIds);
-        if (institutions.size() != uniqueInstitutionIds.size()) {
-            throw new ResourceNotFoundException("Una o más instituciones no fueron encontradas.");
-        }
-
         courseEntity.setName(request.getName());
-        courseEntity.setCourseCost(request.getCourseCost());
         courseEntity.setCourseType(courseTypeEntity);
         courseEntity.setModality(modalityEntity);
+
         courseEntity.getInstitutions().clear();
-        courseEntity.getInstitutions().addAll(institutions);
+
+        Set<CourseInstitutionEntity> courseInstitutions = new HashSet<>();
+        for (InstitutionPriceDto inst : request.getInstitutions()) {
+            InstitutionEntity institutionEntity = institutionRepository.findById(inst.getInstitution().getId())
+                    .orElseThrow(() -> new ResourceNotFoundException("Institución no encontrada"));
+
+            CourseInstitutionEntity courseInstitution = new CourseInstitutionEntity();
+            courseInstitution.setCourse(courseEntity);
+            courseInstitution.setInstitution(institutionEntity);
+            courseInstitution.setPrice(inst.getPrice());
+            courseInstitution.setId(new CourseInstitutionId(courseEntity.getId(), institutionEntity.getId()));
+            courseInstitutions.add(courseInstitution);
+        }
+
+        courseEntity.getInstitutions().addAll(courseInstitutions);
 
         CourseEntity updatedEntity = courseRepository.save(courseEntity);
         return convertToDto(updatedEntity);
