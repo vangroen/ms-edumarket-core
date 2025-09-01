@@ -2,10 +2,12 @@ package com.ctcse.ms.edumarket.core.course.dto;
 
 import com.ctcse.ms.edumarket.core.common.validation.NotBlankWithMessage;
 import com.ctcse.ms.edumarket.core.common.validation.SizeWithMessage;
+import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 
 import java.math.BigDecimal;
+import java.util.List;
 
 @Data
 public class UpdateCourseRequest {
@@ -23,6 +25,6 @@ public class UpdateCourseRequest {
     @NotNull(message = "El ID de la modalidad (idModality) no puede ser nulo.")
     private Long idModality;
 
-    @NotNull(message = "El ID de la institución (idInstitution) no puede ser nulo.")
-    private Long idInstitution;
+    @NotEmpty(message = "Debe proporcionar al menos un ID de institución.")
+    private List<Long> idInstitutions;
 }

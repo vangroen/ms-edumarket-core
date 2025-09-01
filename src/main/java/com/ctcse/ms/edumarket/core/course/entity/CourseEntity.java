@@ -9,6 +9,8 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
+import java.util.HashSet;
+import java.util.Set;
 
 @Entity
 @Table(name = "course")
@@ -36,7 +38,9 @@ public class CourseEntity {
     @JoinColumn(name = "idModality", nullable = false)
     private ModalityEntity modality;
 
-    @ManyToOne(optional = false)
-    @JoinColumn(name = "idInstitution", nullable = false)
-    private InstitutionEntity institution;
+    @ManyToMany(fetch = FetchType.LAZY, cascade = { CascadeType.PERSIST, CascadeType.MERGE })
+    @JoinTable(name = "course_institution",
+            joinColumns = { @JoinColumn(name = "idCourse") },
+            inverseJoinColumns = { @JoinColumn(name = "idInstitution") })
+    private Set<InstitutionEntity> institutions = new HashSet<>();
 }

@@ -2,6 +2,7 @@ package com.ctcse.ms.edumarket.core.course.service;
 
 import com.ctcse.ms.edumarket.core.common.exception.ResourceNotFoundException;
 import com.ctcse.ms.edumarket.core.course.dto.CourseDto;
+import com.ctcse.ms.edumarket.core.course.dto.CourseWithInstitutionsDto;
 import com.ctcse.ms.edumarket.core.course.dto.CreateCourseRequest;
 import com.ctcse.ms.edumarket.core.course.dto.UpdateCourseRequest;
 import com.ctcse.ms.edumarket.core.course.entity.CourseEntity;
@@ -20,7 +21,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
@@ -31,6 +34,13 @@ public class CourseService {
     private final CourseTypeRepository courseTypeRepository;
     private final ModalityRepository modalityRepository;
     private final InstitutionRepository institutionRepository;
+
+    @Transactional(readOnly = true)
+    public List<CourseWithInstitutionsDto> findAllCoursesWithInstitutions() {
+        return courseRepository.findAll().stream()
+                .map(this::convertToCourseWithInstitutionsDto)
+                .collect(Collectors.toList());
+    }
 
     @Transactional(readOnly = true)
     public List<CourseDto> findAll() {
@@ -60,10 +70,10 @@ public class CourseService {
             dto.setModality(modalityDto);
         }
 
-        if (entity.getInstitution() != null) {
-            final var institutionDto = getInstitutionDto(entity.getInstitution());
-            dto.setInstitution(institutionDto);
-        }
+        List<InstitutionDto> institutionDtos = entity.getInstitutions().stream()
+                .map(this::getInstitutionDto)
+                .collect(Collectors.toList());
+        dto.setInstitutions(institutionDtos);
 
         return dto;
     }
@@ -93,18 +103,21 @@ public class CourseService {
         ModalityEntity modalityEntity = modalityRepository.findById(request.getIdModality())
                 .orElseThrow(() -> new ResourceNotFoundException("La modalidad con id " + request.getIdModality() + " no fue encontrado"));
 
-        InstitutionEntity institutionEntity = institutionRepository.findById(request.getIdInstitution())
-                .orElseThrow(() -> new ResourceNotFoundException("La institucion con id " + request.getIdInstitution() + " no fue encontrado"));
+        Set<Long> uniqueInstitutionIds = new HashSet<>(request.getIdInstitutions());
+
+        List<InstitutionEntity> institutions = institutionRepository.findAllById(uniqueInstitutionIds);
+        if (institutions.size() != uniqueInstitutionIds.size()) {
+            throw new ResourceNotFoundException("Una o más instituciones no fueron encontradas.");
+        }
 
         CourseEntity courseEntity = new CourseEntity();
         courseEntity.setName(request.getName());
         courseEntity.setCourseCost(request.getCourseCost());
         courseEntity.setCourseType(courseTypeEntity);
         courseEntity.setModality(modalityEntity);
-        courseEntity.setInstitution(institutionEntity);
+        courseEntity.setInstitutions(new HashSet<>(institutions));
 
         CourseEntity savedCourseEntity = courseRepository.save(courseEntity);
-
         return convertToDto(savedCourseEntity);
     }
 
@@ -117,16 +130,21 @@ public class CourseService {
                 .orElseThrow(() -> new ResourceNotFoundException("El tipo de curso con id " + request.getIdCourseType() + " no fue encontrado"));
 
         ModalityEntity modalityEntity = modalityRepository.findById(request.getIdModality())
-                .orElseThrow(() -> new ResourceNotFoundException("La modalidad con id " + request.getIdModality() + " no fue encontrada"));
+                .orElseThrow(() -> new ResourceNotFoundException("La modalidad con id " + request.getIdModality() + " no fue encontrado"));
 
-        InstitutionEntity institutionEntity = institutionRepository.findById(request.getIdInstitution())
-                .orElseThrow(() -> new ResourceNotFoundException("La institución con id " + request.getIdInstitution() + " no fue encontrada"));
+        Set<Long> uniqueInstitutionIds = new HashSet<>(request.getIdInstitutions());
+
+        List<InstitutionEntity> institutions = institutionRepository.findAllById(uniqueInstitutionIds);
+        if (institutions.size() != uniqueInstitutionIds.size()) {
+            throw new ResourceNotFoundException("Una o más instituciones no fueron encontradas.");
+        }
 
         courseEntity.setName(request.getName());
         courseEntity.setCourseCost(request.getCourseCost());
         courseEntity.setCourseType(courseTypeEntity);
         courseEntity.setModality(modalityEntity);
-        courseEntity.setInstitution(institutionEntity);
+        courseEntity.getInstitutions().clear();
+        courseEntity.getInstitutions().addAll(institutions);
 
         CourseEntity updatedEntity = courseRepository.save(courseEntity);
         return convertToDto(updatedEntity);
@@ -145,5 +163,14 @@ public class CourseService {
             throw new ResourceNotFoundException("El curso con id " + id + " no fue encontrado.");
         }
         courseRepository.deleteById(id);
+    }
+
+    private CourseWithInstitutionsDto convertToCourseWithInstitutionsDto(CourseEntity entity) {
+        CourseWithInstitutionsDto dto = new CourseWithInstitutionsDto();
+        dto.setId(entity.getId());
+        dto.setName(entity.getName());
+        dto.setInstitutions(entity.getInstitutions().stream()
+                .map(this::getInstitutionDto).collect(Collectors.toList()));
+        return dto;
     }
 }

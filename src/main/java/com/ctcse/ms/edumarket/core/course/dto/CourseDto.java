@@ -6,6 +6,7 @@ import com.ctcse.ms.edumarket.core.modality.dto.ModalityDto;
 import lombok.Data;
 
 import java.math.BigDecimal;
+import java.util.List;
 
 @Data
 public class CourseDto {
@@ -15,5 +16,5 @@ public class CourseDto {
     private BigDecimal courseCost;
     private CourseTypeDto courseType;
     private ModalityDto modality;
-    private InstitutionDto institution;
+    private List<InstitutionDto> institutions;
 }
