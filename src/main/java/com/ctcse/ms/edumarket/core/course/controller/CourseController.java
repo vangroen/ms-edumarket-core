@@ -16,40 +16,35 @@ import java.util.List;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/api/v1")
+@RequestMapping("/api/v1/courses")
 @RequiredArgsConstructor
 public class CourseController {
 
     private final CourseService service;
 
-    @GetMapping("/courses-by-institution")
-    public ResponseEntity<List<CourseWithInstitutionsDto>> getAllCoursesByInstitution() {
-        return ResponseEntity.ok(service.findAllCoursesWithInstitutions());
-    }
-
-    @GetMapping("/courses")
+    @GetMapping
     public ResponseEntity<List<CourseDto>> getAll() {
         return ResponseEntity.ok(service.findAll());
     }
 
-    @PostMapping("/courses")
+    @PostMapping
     public ResponseEntity<CourseDto> create(@Valid @RequestBody CreateCourseRequest request) {
         CourseDto newDto = service.create(request);
         return new ResponseEntity<>(newDto, HttpStatus.CREATED);
     }
 
-    @GetMapping("/courses/{id}")
+    @GetMapping("/{id}")
     public ResponseEntity<CourseDto> getById(@PathVariable Long id) {
         return ResponseEntity.ok(service.findById(id));
     }
 
-    @PutMapping("/courses/{id}")
+    @PutMapping("/{id}")
     public ResponseEntity<CourseDto> update(@PathVariable Long id, @Valid @RequestBody UpdateCourseRequest request) {
         CourseDto updatedDto = service.update(id, request);
         return ResponseEntity.ok(updatedDto);
     }
 
-    @DeleteMapping("/courses/{id}")
+    @DeleteMapping("/{id}")
     public ResponseEntity<Map<String, String>> delete(@PathVariable Long id) {
         service.deleteById(id);
         Map<String, String> response = new HashMap<>();

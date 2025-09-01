@@ -36,13 +36,6 @@ public class CourseService {
     private final InstitutionRepository institutionRepository;
 
     @Transactional(readOnly = true)
-    public List<CourseWithInstitutionsDto> findAllCoursesWithInstitutions() {
-        return courseRepository.findAll().stream()
-                .map(this::convertToCourseWithInstitutionsDto)
-                .collect(Collectors.toList());
-    }
-
-    @Transactional(readOnly = true)
     public List<CourseDto> findAll() {
         List<CourseEntity> entities = courseRepository.findAll();
         return entities.stream()
@@ -163,14 +156,5 @@ public class CourseService {
             throw new ResourceNotFoundException("El curso con id " + id + " no fue encontrado.");
         }
         courseRepository.deleteById(id);
-    }
-
-    private CourseWithInstitutionsDto convertToCourseWithInstitutionsDto(CourseEntity entity) {
-        CourseWithInstitutionsDto dto = new CourseWithInstitutionsDto();
-        dto.setId(entity.getId());
-        dto.setName(entity.getName());
-        dto.setInstitutions(entity.getInstitutions().stream()
-                .map(this::getInstitutionDto).collect(Collectors.toList()));
-        return dto;
     }
 }
