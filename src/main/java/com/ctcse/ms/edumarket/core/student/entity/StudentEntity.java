@@ -21,15 +21,15 @@ public class StudentEntity {
     @Column(name = "idStudent")
     private Long id;
 
-    @OneToOne(optional = false)
+    @ManyToOne(optional = false)
     @JoinColumn(name = "idProfession", nullable = false)
     private ProfessionEntity profession;
 
-    @OneToOne(optional = false)
+    @ManyToOne(optional = false)
     @JoinColumn(name = "idInstitution", nullable = false)
     private InstitutionEntity institution;
 
-    @OneToOne(optional = false)
+    @ManyToOne(optional = false)
     @JoinColumn(name = "idAcademicRank", nullable = false)
     private AcademicRankEntity academicRank;
 
