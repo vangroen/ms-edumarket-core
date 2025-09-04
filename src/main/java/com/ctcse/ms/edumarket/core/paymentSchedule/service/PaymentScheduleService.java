@@ -152,4 +152,33 @@ public class PaymentScheduleService {
         }
         paymentScheduleRepository.deleteById(id);
     }
+
+    @Transactional(readOnly = true)
+    public List<PaymentScheduleDto> findByEnrollmentId(Long enrollmentId) {
+        // 1. Busca todas las cuotas para una matrícula específica
+        List<PaymentScheduleEntity> schedules = paymentScheduleRepository.findByEnrollmentId(enrollmentId);
+
+        if (schedules.isEmpty()) {
+            throw new ResourceNotFoundException("No se encontró un cronograma de pagos para la matrícula con id " + enrollmentId);
+        }
+
+        // 2. Ordena las cuotas por fecha para asegurar la numeración correcta
+        schedules.sort(Comparator.comparing(PaymentScheduleEntity::getInstallmentDueDate));
+
+        List<PaymentScheduleDto> finalDtos = new ArrayList<>();
+        int monthlyInstallmentCounter = 0;
+
+        // 3. Itera y aplica la lógica de numeración (igual que en findAll)
+        for (PaymentScheduleEntity entity : schedules) {
+            PaymentScheduleDto dto = convertToDto(entity);
+
+            if (dto.getConceptType() != null && dto.getConceptType().getId() == 2L) {
+                monthlyInstallmentCounter++;
+                dto.getConceptType().setDescription("Cuota " + monthlyInstallmentCounter);
+            }
+            finalDtos.add(dto);
+        }
+
+        return finalDtos;
+    }
 }

@@ -60,4 +60,9 @@ public class PaymentScheduleController {
         response.put("message", "La tarea de verificación de cuotas vencidas se ha ejecutado manualmente.");
         return ResponseEntity.ok(response);
     }
+
+    @GetMapping("/by-enrollment/{enrollmentId}")
+    public ResponseEntity<List<PaymentScheduleDto>> getByEnrollmentId(@PathVariable Long enrollmentId) {
+        return ResponseEntity.ok(service.findByEnrollmentId(enrollmentId));
+    }
 }
