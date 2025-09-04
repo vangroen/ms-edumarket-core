@@ -36,6 +36,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.time.Instant;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.time.temporal.ChronoUnit;
@@ -100,56 +101,56 @@ public class EnrollmentService {
 
         EnrollmentEntity savedEntity = enrollmentRepository.save(enrollmentEntity);
 
-        generatePaymentScheduleForEnrollment(savedEntity, request, coursePriceForInstitution, courseEntity.getDurationInMonths());
+        Integer duration = courseEntity.getDurationInMonths();
+        if (duration == null || duration <= 0) {
+            throw new IllegalStateException("El curso debe tener una duración en meses válida.");
+        }
+
+        // --- CAMBIO CLAVE: Llama al nuevo método genérico ---
+        generatePaymentScheduleForEnrollment(savedEntity, coursePriceForInstitution, duration,
+                request.getEnrollmentDate(), request.getEnrollmentFeeAmount(), request.getFinalRightsAmount());
 
         return convertToDto(savedEntity);
     }
 
-    private void generatePaymentScheduleForEnrollment(EnrollmentEntity enrollment, CreateEnrollmentRequest request, BigDecimal coursePrice, int durationInMonths) {
+    private void generatePaymentScheduleForEnrollment(EnrollmentEntity enrollment, BigDecimal coursePrice, int durationInMonths, Instant enrollmentDate, BigDecimal enrollmentFeeAmount, BigDecimal finalRightsAmount) {
+
         ConceptTypeEntity enrollmentConcept = conceptTypeRepository.findById(1L).orElseThrow(() -> new ResourceNotFoundException("Tipo de Concepto 'Matrícula' no encontrado"));
         ConceptTypeEntity monthlyFeeConcept = conceptTypeRepository.findById(2L).orElseThrow(() -> new ResourceNotFoundException("Tipo de Concepto 'Cuota Mensual' no encontrado"));
         ConceptTypeEntity finalRightsConcept = conceptTypeRepository.findById(3L).orElseThrow(() -> new ResourceNotFoundException("Tipo de Concepto 'Derechos Finales' no encontrado"));
         InstallmentStatusEntity pendingStatus = installmentStatusRepository.findById(1L).orElseThrow(() -> new ResourceNotFoundException("Estado de cuota 'Pendiente' no encontrado"));
 
-        // --- CAMBIO CLAVE 1: Convertir el Instant inicial a ZonedDateTime ---
-        // Usamos ZoneOffset.UTC para mantener la consistencia en el servidor.
-        ZonedDateTime enrollmentZonedDateTime = request.getEnrollmentDate().atZone(ZoneOffset.UTC);
+        ZonedDateTime enrollmentZonedDateTime = enrollmentDate.atZone(ZoneOffset.UTC);
 
-        // Crear la cuota de Matrícula (sin cambios aquí)
+        // 1. Cuota de Matrícula
         PaymentScheduleEntity enrollmentFee = new PaymentScheduleEntity();
         enrollmentFee.setEnrollment(enrollment);
         enrollmentFee.setConceptType(enrollmentConcept);
-        enrollmentFee.setInstallmentAmount(request.getEnrollmentFeeAmount());
-        enrollmentFee.setInstallmentDueDate(request.getEnrollmentDate());
+        enrollmentFee.setInstallmentAmount(enrollmentFeeAmount);
+        enrollmentFee.setInstallmentDueDate(enrollmentDate);
         enrollmentFee.setInstallmentStatus(pendingStatus);
         paymentScheduleRepository.save(enrollmentFee);
 
-        // Crear las cuotas mensuales del curso
+        // 2. Cuotas Mensuales
         BigDecimal monthlyInstallmentAmount = coursePrice.divide(new BigDecimal(durationInMonths), 2, RoundingMode.HALF_UP);
         for (int i = 1; i <= durationInMonths; i++) {
             PaymentScheduleEntity monthlyFee = new PaymentScheduleEntity();
             monthlyFee.setEnrollment(enrollment);
             monthlyFee.setConceptType(monthlyFeeConcept);
             monthlyFee.setInstallmentAmount(monthlyInstallmentAmount);
-
-            // --- CAMBIO CLAVE 2: Usar ZonedDateTime para sumar meses y luego convertir a Instant ---
             ZonedDateTime nextDueDate = enrollmentZonedDateTime.plusMonths(i);
             monthlyFee.setInstallmentDueDate(nextDueDate.toInstant());
-
             monthlyFee.setInstallmentStatus(pendingStatus);
             paymentScheduleRepository.save(monthlyFee);
         }
 
-        // Crear la cuota de Derechos Finales
+        // 3. Cuota de Derechos Finales
         PaymentScheduleEntity finalRightsFee = new PaymentScheduleEntity();
         finalRightsFee.setEnrollment(enrollment);
         finalRightsFee.setConceptType(finalRightsConcept);
-        finalRightsFee.setInstallmentAmount(request.getFinalRightsAmount());
-
-        // --- CAMBIO CLAVE 3: Hacer lo mismo para la cuota final ---
+        finalRightsFee.setInstallmentAmount(finalRightsAmount);
         ZonedDateTime finalRightsDueDate = enrollmentZonedDateTime.plusMonths(durationInMonths + 1);
         finalRightsFee.setInstallmentDueDate(finalRightsDueDate.toInstant());
-
         finalRightsFee.setInstallmentStatus(pendingStatus);
         paymentScheduleRepository.save(finalRightsFee);
     }
@@ -275,13 +276,33 @@ public class EnrollmentService {
         CourseEntity courseEntity = courseRepository.findById(request.getIdCourse())
                 .orElseThrow(() -> new ResourceNotFoundException("El curso con id " + request.getIdCourse() + " no fue encontrado"));
 
-        enrollmentEntity.setTotalEnrollmentCost(request.getTotalEnrollmentCost());
+        InstitutionEntity institutionEntity = institutionRepository.findById(request.getIdInstitution())
+                .orElseThrow(() -> new ResourceNotFoundException("La institución con id " + request.getIdInstitution() + " no fue encontrada..."));
+
+        List<PaymentScheduleEntity> oldSchedule = paymentScheduleRepository.findByEnrollmentId(id);
+        paymentScheduleRepository.deleteAll(oldSchedule);
+
+        BigDecimal coursePriceForInstitution = courseEntity.getInstitutions().stream()
+                .filter(ci -> ci.getInstitution().getId().equals(request.getIdInstitution()))
+                .map(CourseInstitutionEntity::getPrice)
+                .findFirst()
+                .orElseThrow(() -> new ResourceNotFoundException("Precio no encontrado..."));
+
+        BigDecimal totalCost = request.getEnrollmentFeeAmount()
+                .add(coursePriceForInstitution)
+                .add(request.getFinalRightsAmount());
+
+        enrollmentEntity.setTotalEnrollmentCost(totalCost);
         enrollmentEntity.setEnrollmentDate(request.getEnrollmentDate());
         enrollmentEntity.setStudent(studentEntity);
         enrollmentEntity.setAgent(agentEntity);
         enrollmentEntity.setCourse(courseEntity);
+        enrollmentEntity.setInstitution(institutionEntity);
 
         EnrollmentEntity updatedEntity = enrollmentRepository.save(enrollmentEntity);
+        generatePaymentScheduleForEnrollment(updatedEntity, coursePriceForInstitution, courseEntity.getDurationInMonths(),
+                request.getEnrollmentDate(), request.getEnrollmentFeeAmount(), request.getFinalRightsAmount());
+
         return convertToDto(updatedEntity);
     }
 

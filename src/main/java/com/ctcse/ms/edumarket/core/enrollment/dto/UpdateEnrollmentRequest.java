@@ -8,18 +8,18 @@ import java.time.Instant;
 @Data
 public class UpdateEnrollmentRequest {
 
-    @NotNull(message = "El costo total de la matrícula no puede ser nulo.")
-    private BigDecimal totalEnrollmentCost;
-
-    @NotNull(message = "La fecha de matrícula no puede ser nula.")
+    @NotNull
     private Instant enrollmentDate;
-
-    @NotNull(message = "El ID del estudiante no puede ser nulo.")
+    @NotNull
     private Long idStudent;
-
-    @NotNull(message = "El ID del agente no puede ser nulo.")
+    @NotNull
     private Long idAgent;
-
-    @NotNull(message = "El ID del curso no puede ser nulo.")
+    @NotNull
     private Long idCourse;
+    @NotNull
+    private Long idInstitution;
+    @NotNull
+    private BigDecimal enrollmentFeeAmount;
+    @NotNull
+    private BigDecimal finalRightsAmount;
 }
