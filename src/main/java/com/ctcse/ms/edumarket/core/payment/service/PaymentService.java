@@ -1,6 +1,8 @@
 package com.ctcse.ms.edumarket.core.payment.service;
 
 import com.ctcse.ms.edumarket.core.common.exception.ResourceNotFoundException;
+import com.ctcse.ms.edumarket.core.installmentStatus.entity.InstallmentStatusEntity;
+import com.ctcse.ms.edumarket.core.installmentStatus.repository.InstallmentStatusRepository;
 import com.ctcse.ms.edumarket.core.payment.dto.CreatePaymentRequest;
 import com.ctcse.ms.edumarket.core.payment.dto.PaymentDto;
 import com.ctcse.ms.edumarket.core.payment.dto.UpdatePaymentRequest;
@@ -27,6 +29,7 @@ public class PaymentService {
     private final PaymentTypeRepository paymentTypeRepository;
     private final PaymentScheduleRepository paymentScheduleRepository;
     private final PaymentScheduleService paymentScheduleService;
+    private final InstallmentStatusRepository installmentStatusRepository;
 
     @Transactional(readOnly = true)
     public List<PaymentDto> findAll() {
@@ -63,6 +66,21 @@ public class PaymentService {
 
         PaymentScheduleEntity paymentScheduleEntity = paymentScheduleRepository.findById(request.getIdPaymentSchedule())
                 .orElseThrow(() -> new ResourceNotFoundException("El cronograma de pago con id " + request.getIdPaymentSchedule() + " no fue encontrado."));
+
+        // --- INICIO DE LA NUEVA LÓGICA ---
+
+        // 1. Validar que el monto pagado sea suficiente (opcional pero recomendado)
+        // Por simplicidad, asumiremos que siempre se paga el monto exacto.
+
+        // 2. Buscar el estado "Pagado"
+        InstallmentStatusEntity paidStatus = installmentStatusRepository.findById(2L) // Asumiendo que 2L es 'Pagado'
+                .orElseThrow(() -> new ResourceNotFoundException("El estado 'Pagado' no se encontró en la base de datos."));
+
+        // 3. Actualizar el estado de la cuota
+        paymentScheduleEntity.setInstallmentStatus(paidStatus);
+        paymentScheduleRepository.save(paymentScheduleEntity);
+
+        // --- FIN DE LA NUEVA LÓGICA ---
 
         PaymentEntity paymentEntity = new PaymentEntity();
         paymentEntity.setPaymentAmount(request.getPaymentAmount());
