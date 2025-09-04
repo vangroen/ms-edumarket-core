@@ -315,9 +315,27 @@ public class EnrollmentService {
 
     @Transactional
     public void deleteById(Long id) {
+        // 1. Verifica si la matrícula existe
         if (!enrollmentRepository.existsById(id)) {
             throw new ResourceNotFoundException("La matrícula con id " + id + " no fue encontrada.");
         }
+
+        // 2. Busca todas las cuotas del cronograma asociadas a esta matrícula
+        List<PaymentScheduleEntity> scheduleToDelete = paymentScheduleRepository.findByEnrollmentId(id);
+
+        // --- INICIO DE LA MODIFICACIÓN ---
+
+        // 3. ANTES de borrar el cronograma, borra todos los pagos asociados a esas cuotas
+        if (!scheduleToDelete.isEmpty()) {
+            paymentRepository.deleteAllByPaymentScheduleIn(scheduleToDelete);
+        }
+
+        // 4. AHORA SÍ, borra el cronograma completo
+        paymentScheduleRepository.deleteAll(scheduleToDelete);
+
+        // --- FIN DE LA MODIFICACIÓN ---
+
+        // 5. Finalmente, elimina la matrícula
         enrollmentRepository.deleteById(id);
     }
 }
