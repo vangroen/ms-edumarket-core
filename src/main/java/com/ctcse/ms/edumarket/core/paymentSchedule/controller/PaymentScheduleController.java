@@ -3,6 +3,7 @@ package com.ctcse.ms.edumarket.core.paymentSchedule.controller;
 import com.ctcse.ms.edumarket.core.paymentSchedule.dto.CreatePaymentScheduleRequest;
 import com.ctcse.ms.edumarket.core.paymentSchedule.dto.PaymentScheduleDto;
 import com.ctcse.ms.edumarket.core.paymentSchedule.dto.UpdatePaymentScheduleRequest;
+import com.ctcse.ms.edumarket.core.paymentSchedule.service.OverdueInstallmentService;
 import com.ctcse.ms.edumarket.core.paymentSchedule.service.PaymentScheduleService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -20,6 +21,7 @@ import java.util.Map;
 public class PaymentScheduleController {
 
     private final PaymentScheduleService service;
+    private final OverdueInstallmentService overdueInstallmentService; // <-- Inyectar el nuevo servicio
 
     @GetMapping
     public ResponseEntity<List<PaymentScheduleDto>> getAll() {
@@ -48,6 +50,14 @@ public class PaymentScheduleController {
         service.deleteById(id);
         Map<String, String> response = new HashMap<>();
         response.put("message", "El cronograma de pago con id " + id + " ha sido eliminado exitosamente.");
+        return ResponseEntity.ok(response);
+    }
+
+    @PostMapping("/run-overdue-check")
+    public ResponseEntity<Map<String, String>> runOverdueCheckManually() {
+        overdueInstallmentService.updateOverdueInstallments();
+        Map<String, String> response = new HashMap<>();
+        response.put("message", "La tarea de verificación de cuotas vencidas se ha ejecutado manualmente.");
         return ResponseEntity.ok(response);
     }
 }
