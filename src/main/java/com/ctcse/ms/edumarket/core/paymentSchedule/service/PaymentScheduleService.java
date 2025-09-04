@@ -19,7 +19,10 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
@@ -37,9 +40,33 @@ public class PaymentScheduleService {
     @Transactional(readOnly = true)
     public List<PaymentScheduleDto> findAll() {
         List<PaymentScheduleEntity> entities = paymentScheduleRepository.findAll();
-        return entities.stream()
-                .map(this::convertToDto)
-                .collect(Collectors.toList());
+        // Agrupamos todos los cronogramas por su matrícula correspondiente
+        Map<EnrollmentEntity, List<PaymentScheduleEntity>> groupedByEnrollment = entities.stream()
+                .collect(Collectors.groupingBy(PaymentScheduleEntity::getEnrollment));
+
+        List<PaymentScheduleDto> finalDtos = new ArrayList<>();
+
+        // Procesamos cada grupo (cada matrícula) de forma independiente
+        for (List<PaymentScheduleEntity> schedulesForOneEnrollment : groupedByEnrollment.values()) {
+
+            // Ordenamos las cuotas de esta matrícula por fecha para asegurar el orden correcto
+            schedulesForOneEnrollment.sort(Comparator.comparing(PaymentScheduleEntity::getInstallmentDueDate));
+
+            int monthlyInstallmentCounter = 0;
+            for (PaymentScheduleEntity entity : schedulesForOneEnrollment) {
+                // Usamos tu método `convertToDto` para la conversión inicial
+                PaymentScheduleDto dto = convertToDto(entity);
+
+                // Si el concepto es "Cuota Mensual" (ID=2), modificamos la descripción
+                if (dto.getConceptType() != null && dto.getConceptType().getId() == 2L) {
+                    monthlyInstallmentCounter++;
+                    // Sobreescribimos la descripción para añadir el número
+                    dto.getConceptType().setDescription("Cuota " + monthlyInstallmentCounter);
+                }
+                finalDtos.add(dto);
+            }
+        }
+        return finalDtos;
     }
 
     public PaymentScheduleDto convertToDto(PaymentScheduleEntity entity) {
