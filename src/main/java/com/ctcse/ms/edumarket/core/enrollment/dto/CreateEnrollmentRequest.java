@@ -14,11 +14,15 @@ import java.time.Instant;
 @Data
 public class CreateEnrollmentRequest {
 
-    private BigDecimal totalEnrollmentCost;
+//    private BigDecimal totalEnrollmentCost;
 
     private Instant enrollmentDate;
-
     private Long idStudent;
     private Long idAgent;
     private Long idCourse;
+    private Long idInstitution; // <--- CAMBIO CLAVE: Añadir este campo
+
+    // Estos montos los define el negocio y se envían desde el frontend
+    private BigDecimal enrollmentFeeAmount;
+    private BigDecimal finalRightsAmount;
 }

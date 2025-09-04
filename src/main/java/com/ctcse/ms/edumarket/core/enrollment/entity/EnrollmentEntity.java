@@ -2,6 +2,7 @@ package com.ctcse.ms.edumarket.core.enrollment.entity;
 
 import com.ctcse.ms.edumarket.core.agent.entity.AgentEntity;
 import com.ctcse.ms.edumarket.core.course.entity.CourseEntity;
+import com.ctcse.ms.edumarket.core.institution.entity.InstitutionEntity;
 import com.ctcse.ms.edumarket.core.student.entity.StudentEntity;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -40,4 +41,8 @@ public class EnrollmentEntity {
     @ManyToOne(optional = false)
     @JoinColumn(name = "idCourse", nullable = false)
     private CourseEntity course;
+
+    @ManyToOne(optional = false)
+    @JoinColumn(name = "idInstitution", nullable = false)
+    private InstitutionEntity institution;
 }

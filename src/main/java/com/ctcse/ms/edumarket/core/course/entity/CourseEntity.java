@@ -26,6 +26,9 @@ public class CourseEntity {
     @Column(name = "name", nullable = false, unique = true, length = 100)
     private String name;
 
+    @Column(name = "durationInMonths", nullable = false)
+    private Integer durationInMonths;
+
     @ManyToOne(optional = false)
     @JoinColumn(name = "idCourseType", nullable = false)
     private CourseTypeEntity courseType;

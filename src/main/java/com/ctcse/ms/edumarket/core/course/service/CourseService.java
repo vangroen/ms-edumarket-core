@@ -50,6 +50,8 @@ public class CourseService {
         CourseDto dto = new CourseDto();
         dto.setId(entity.getId());
         dto.setName(entity.getName());
+        dto.setDurationInMonths(entity.getDurationInMonths());
+
 
         if (entity.getCourseType() != null) {
             var courseTypeDto = new CourseTypeDto();
@@ -107,6 +109,7 @@ public class CourseService {
         courseEntity.setName(request.getName());
         courseEntity.setCourseType(courseTypeEntity);
         courseEntity.setModality(modalityEntity);
+        courseEntity.setDurationInMonths(request.getDurationInMonths());
 
         // Guardamos el curso primero para obtener un ID
         CourseEntity savedCourseEntity = courseRepository.save(courseEntity);
