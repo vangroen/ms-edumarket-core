@@ -83,10 +83,6 @@ public class PaymentScheduleService {
             dto.setInstallmentStatus(installmentStatusService.convertToDto(entity.getInstallmentStatus()));
         }
 
-        if (entity.getEnrollment() != null) {
-            dto.setEnrollment(enrollmentService.convertToDto(entity.getEnrollment()));
-        }
-
         return dto;
     }
 
