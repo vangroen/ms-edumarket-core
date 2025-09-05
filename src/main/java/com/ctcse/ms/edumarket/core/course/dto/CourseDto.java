@@ -13,7 +13,6 @@ public class CourseDto {
 
     private Long id;
     private String name;
-    private Integer durationInMonths;
     private CourseTypeDto courseType;
     private ModalityDto modality;
     private List<InstitutionPriceDto> institutions;

@@ -50,8 +50,6 @@ public class CourseService {
         CourseDto dto = new CourseDto();
         dto.setId(entity.getId());
         dto.setName(entity.getName());
-        dto.setDurationInMonths(entity.getDurationInMonths());
-
 
         if (entity.getCourseType() != null) {
             var courseTypeDto = new CourseTypeDto();
@@ -71,6 +69,7 @@ public class CourseService {
                 .map(courseInstitution -> {
                     InstitutionPriceDto institutionPriceDto = new InstitutionPriceDto();
                     institutionPriceDto.setPrice(courseInstitution.getPrice());
+                    institutionPriceDto.setDurationInMonths(courseInstitution.getDurationInMonths());
                     institutionPriceDto.setInstitution(getInstitutionDto(courseInstitution.getInstitution()));
                     return institutionPriceDto;
                 })
@@ -109,11 +108,9 @@ public class CourseService {
         courseEntity.setName(request.getName());
         courseEntity.setCourseType(courseTypeEntity);
         courseEntity.setModality(modalityEntity);
-        courseEntity.setDurationInMonths(request.getDurationInMonths());
 
         // Guardamos el curso primero para obtener un ID
         CourseEntity savedCourseEntity = courseRepository.save(courseEntity);
-
 
         Set<CourseInstitutionEntity> courseInstitutions = new HashSet<>();
         for (InstitutionPriceDto inst : request.getInstitutions()) {
@@ -124,13 +121,12 @@ public class CourseService {
             courseInstitution.setCourse(savedCourseEntity);
             courseInstitution.setInstitution(institutionEntity);
             courseInstitution.setPrice(inst.getPrice());
+            courseInstitution.setDurationInMonths(inst.getDurationInMonths());
             courseInstitution.setId(new CourseInstitutionId(savedCourseEntity.getId(), institutionEntity.getId()));
             courseInstitutions.add(courseInstitution);
         }
 
         savedCourseEntity.setInstitutions(courseInstitutions);
-
-
         return convertToDto(courseRepository.save(savedCourseEntity));
     }
 
@@ -160,6 +156,7 @@ public class CourseService {
             courseInstitution.setCourse(courseEntity);
             courseInstitution.setInstitution(institutionEntity);
             courseInstitution.setPrice(inst.getPrice());
+            courseInstitution.setDurationInMonths(inst.getDurationInMonths());
             courseInstitution.setId(new CourseInstitutionId(courseEntity.getId(), institutionEntity.getId()));
             courseInstitutions.add(courseInstitution);
         }

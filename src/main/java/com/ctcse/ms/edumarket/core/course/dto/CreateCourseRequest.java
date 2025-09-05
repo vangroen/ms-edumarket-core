@@ -3,6 +3,7 @@ package com.ctcse.ms.edumarket.core.course.dto;
 import com.ctcse.ms.edumarket.core.common.validation.NotBlankWithMessage;
 import com.ctcse.ms.edumarket.core.common.validation.SizeWithMessage;
 import com.ctcse.ms.edumarket.core.institution.dto.InstitutionPriceDto;
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
@@ -24,11 +25,7 @@ public class CreateCourseRequest {
     @NotNull(message = "El ID de la modalidad (idModality) no puede ser nulo.")
     private Long idModality;
 
-    // --- CAMBIO CLAVE 1: Añadir el campo de duración ---
-    @NotNull(message = "La duración en meses no puede ser nula.")
-    @Min(value = 1, message = "La duración debe ser de al menos 1 mes.")
-    private Integer durationInMonths;
-
-    @NotEmpty(message = "Debe proporcionar al menos una institución con su precio.")
+    @NotEmpty(message = "Debe proporcionar al menos una institución con su precio y duración.")
+    @Valid // Añadimos @Valid para que se validen los objetos dentro de la lista
     private List<InstitutionPriceDto> institutions;
 }

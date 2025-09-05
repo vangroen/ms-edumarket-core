@@ -28,4 +28,7 @@ public class CourseInstitutionEntity {
 
     @Column(name = "price", nullable = false)
     private BigDecimal price;
+
+    @Column(name = "durationInMonths", nullable = false)
+    private Integer durationInMonths;
 }

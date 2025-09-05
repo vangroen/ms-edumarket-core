@@ -8,7 +8,6 @@ import lombok.Data;
 public class EnrolledCourseDto {
     private Long id;
     private String name;
-    private Integer durationInMonths;
     private CourseTypeDto courseType;
     private ModalityDto modality;
 }
