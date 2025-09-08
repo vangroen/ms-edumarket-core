@@ -103,4 +103,11 @@ public class PersonService {
         }
         personRepository.deleteById(id);
     }
+
+    @Transactional(readOnly = true)
+    public PersonDto findByDocumentNumber(String documentNumber) {
+        PersonEntity personEntity = personRepository.findByDocumentNumber(documentNumber)
+                .orElseThrow(() -> new ResourceNotFoundException("La persona con el documento " + documentNumber + " no fue encontrada."));
+        return convertToDto(personEntity);
+    }
 }

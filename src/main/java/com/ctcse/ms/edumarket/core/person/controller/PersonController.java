@@ -49,4 +49,9 @@ public class PersonController {
         response.put("message", "La persona con id " + id + " ha sido eliminada exitosamente.");
         return ResponseEntity.ok(response);
     }
+
+    @GetMapping("/by-document/{documentNumber}")
+    public ResponseEntity<PersonDto> getByDocumentNumber(@PathVariable String documentNumber) {
+        return ResponseEntity.ok(service.findByDocumentNumber(documentNumber));
+    }
 }
