@@ -11,4 +11,5 @@ import java.util.List;
 public interface PaymentRepository extends JpaRepository<PaymentEntity, Long> {
     List<PaymentEntity> findByPaymentScheduleId(Long paymentScheduleId);
     void deleteAllByPaymentScheduleIn(List<PaymentScheduleEntity> schedules);
+    List<PaymentEntity> findByPaymentScheduleIdIn(List<Long> paymentScheduleIds);
 }

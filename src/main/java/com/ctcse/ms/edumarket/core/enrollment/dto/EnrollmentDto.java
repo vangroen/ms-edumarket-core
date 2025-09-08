@@ -23,4 +23,6 @@ public class EnrollmentDto {
 
     private BigDecimal enrollmentFeeAmount;
     private BigDecimal finalRightsAmount;
+
+    private boolean active;
 }

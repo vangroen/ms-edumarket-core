@@ -15,4 +15,5 @@ public class PaymentDto {
     private Instant paymentDate;
     private PaymentTypeDto paymentType;
     private PaymentScheduleDto paymentSchedule;
+    private boolean active;
 }

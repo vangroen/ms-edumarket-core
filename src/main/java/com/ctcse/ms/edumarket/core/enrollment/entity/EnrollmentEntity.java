@@ -45,4 +45,7 @@ public class EnrollmentEntity {
     @ManyToOne(optional = false)
     @JoinColumn(name = "idInstitution", nullable = false)
     private InstitutionEntity institution;
+
+    @Column(name = "active", nullable = false)
+    private boolean active = true;
 }

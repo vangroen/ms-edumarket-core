@@ -44,6 +44,7 @@ public class PaymentService {
         dto.setId(entity.getId());
         dto.setPaymentAmount(entity.getPaymentAmount());
         dto.setPaymentDate(entity.getPaymentDate());
+        dto.setActive(entity.isActive());
 
         if (entity.getPaymentType() != null) {
             var payTypeDto = new PaymentTypeDto();

@@ -5,6 +5,7 @@ import com.ctcse.ms.edumarket.core.agent.dto.CreateAgentRequest;
 import com.ctcse.ms.edumarket.core.agent.dto.UpdateAgentRequest;
 import com.ctcse.ms.edumarket.core.agent.entity.AgentEntity;
 import com.ctcse.ms.edumarket.core.agent.repository.AgentRepository;
+import com.ctcse.ms.edumarket.core.common.exception.ResourceAlreadyExistsException;
 import com.ctcse.ms.edumarket.core.common.exception.ResourceNotFoundException;
 import com.ctcse.ms.edumarket.core.course.dto.CourseDto;
 import com.ctcse.ms.edumarket.core.course.entity.CourseEntity;
@@ -71,6 +72,10 @@ public class AgentService {
 
     @Transactional
     public AgentDto create(CreateAgentRequest request) {
+        agentRepository.findByPersonId(request.getIdPerson()).ifPresent(a -> {
+            throw new ResourceAlreadyExistsException("La persona con id " + request.getIdPerson() + " ya está registrada como agente.");
+        });
+
         PersonEntity personEntity = personRepository.findById(request.getIdPerson())
                 .orElseThrow(() -> new ResourceNotFoundException("La persona con id " + request.getIdPerson() + " no fue encontrado"));
 

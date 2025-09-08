@@ -40,4 +40,7 @@ public class PaymentScheduleEntity {
     @ManyToOne
     @JoinColumn(name = "idEnrollment", nullable = false)
     private EnrollmentEntity enrollment;
+
+    @Column(name = "active", nullable = false)
+    private boolean active = true;
 }

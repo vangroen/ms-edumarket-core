@@ -74,6 +74,7 @@ public class PaymentScheduleService {
         dto.setId(entity.getId());
         dto.setInstallmentAmount(entity.getInstallmentAmount());
         dto.setInstallmentDueDate(entity.getInstallmentDueDate());
+        dto.setActive(entity.isActive());
 
         if (entity.getConceptType() != null) {
             dto.setConceptType(conceptTypeService.convertToDto(entity.getConceptType()));

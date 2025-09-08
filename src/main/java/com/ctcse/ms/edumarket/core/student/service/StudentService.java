@@ -4,6 +4,7 @@ import com.ctcse.ms.edumarket.core.academicRank.dto.AcademicRankDto;
 import com.ctcse.ms.edumarket.core.academicRank.entity.AcademicRankEntity;
 import com.ctcse.ms.edumarket.core.academicRank.repository.AcademicRankRepository;
 import com.ctcse.ms.edumarket.core.agent.entity.AgentEntity;
+import com.ctcse.ms.edumarket.core.common.exception.ResourceAlreadyExistsException;
 import com.ctcse.ms.edumarket.core.common.exception.ResourceNotFoundException;
 import com.ctcse.ms.edumarket.core.documentType.dto.DocumentTypeDto;
 import com.ctcse.ms.edumarket.core.institution.dto.InstitutionDto;
@@ -118,6 +119,10 @@ public class StudentService {
 
     @Transactional
     public StudentDto create(CreateStudentRequest request) {
+        studentRepository.findByPersonId(request.getIdPerson()).ifPresent(s -> {
+            throw new ResourceAlreadyExistsException("La persona con id " + request.getIdPerson() + " ya está registrada como estudiante.");
+        });
+
         ProfessionEntity professionEntity = professionRepository.findById(request.getIdProfession())
                 .orElseThrow(() -> new ResourceNotFoundException("La profesion con id " + request.getIdProfession() + " no fue encontrado"));
 
@@ -137,7 +142,6 @@ public class StudentService {
         studentEntity.setPerson(personEntity);
 
         StudentEntity savedStudentEntity = studentRepository.save(studentEntity);
-
         return convertToDto(savedStudentEntity);
     }
 

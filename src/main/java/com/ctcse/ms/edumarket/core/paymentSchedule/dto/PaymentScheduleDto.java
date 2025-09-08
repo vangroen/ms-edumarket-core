@@ -16,4 +16,5 @@ public class PaymentScheduleDto {
     private Instant installmentDueDate;
     private ConceptTypeDto conceptType;
     private InstallmentStatusDto installmentStatus;
+    private boolean active;
 }

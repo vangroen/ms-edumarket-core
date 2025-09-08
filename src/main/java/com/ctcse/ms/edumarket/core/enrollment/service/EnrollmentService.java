@@ -180,6 +180,7 @@ public class EnrollmentService {
         dto.setId(entity.getId());
         dto.setTotalEnrollmentCost(entity.getTotalEnrollmentCost());
         dto.setEnrollmentDate(entity.getEnrollmentDate());
+        dto.setActive(entity.isActive());
         if (entity.getStudent() != null) {
             dto.setStudent(studentService.convertToDto(entity.getStudent()));
         }
@@ -205,6 +206,7 @@ public class EnrollmentService {
         InstitutionDto institutionDto = new InstitutionDto();
         institutionDto.setId(entity.getInstitution().getId());
         institutionDto.setName(entity.getInstitution().getName());
+
         if (entity.getInstitution().getInstitutionType() != null) {
             InstitutionTypeDto institutionTypeDto = new InstitutionTypeDto();
             institutionTypeDto.setId(entity.getInstitution().getInstitutionType().getId());
@@ -290,14 +292,27 @@ public class EnrollmentService {
 
     @Transactional
     public void deleteById(Long id) {
-        if (!enrollmentRepository.existsById(id)) {
-            throw new ResourceNotFoundException("La matrícula con id " + id + " no fue encontrada.");
+        // 1. Encontrar la matrícula o lanzar excepción si no existe
+        EnrollmentEntity enrollmentEntity = enrollmentRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("La matrícula con id " + id + " no fue encontrada."));
+
+        // 2. Inactivar la matrícula
+        enrollmentEntity.setActive(false);
+        enrollmentRepository.save(enrollmentEntity);
+
+        // 3. Encontrar y inactivar todos los cronogramas de pago asociados
+        List<PaymentScheduleEntity> schedules = paymentScheduleRepository.findByEnrollmentId(id);
+        if (!schedules.isEmpty()) {
+            schedules.forEach(schedule -> schedule.setActive(false));
+            paymentScheduleRepository.saveAll(schedules);
+
+            // 4. Encontrar y inactivar todos los pagos asociados a esos cronogramas
+            List<Long> scheduleIds = schedules.stream().map(PaymentScheduleEntity::getId).collect(Collectors.toList());
+            List<PaymentEntity> payments = paymentRepository.findByPaymentScheduleIdIn(scheduleIds);
+            if (!payments.isEmpty()) {
+                payments.forEach(payment -> payment.setActive(false));
+                paymentRepository.saveAll(payments);
+            }
         }
-        List<PaymentScheduleEntity> scheduleToDelete = paymentScheduleRepository.findByEnrollmentId(id);
-        if (!scheduleToDelete.isEmpty()) {
-            paymentRepository.deleteAllByPaymentScheduleIn(scheduleToDelete);
-        }
-        paymentScheduleRepository.deleteAll(scheduleToDelete);
-        enrollmentRepository.deleteById(id);
     }
 }
