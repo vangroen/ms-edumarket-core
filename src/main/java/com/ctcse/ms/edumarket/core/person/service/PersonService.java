@@ -1,5 +1,6 @@
 package com.ctcse.ms.edumarket.core.person.service;
 
+import com.ctcse.ms.edumarket.core.common.exception.ResourceAlreadyExistsException;
 import com.ctcse.ms.edumarket.core.common.exception.ResourceNotFoundException;
 import com.ctcse.ms.edumarket.core.documentType.dto.DocumentTypeDto;
 import com.ctcse.ms.edumarket.core.documentType.entity.DocumentTypeEntity;
@@ -14,6 +15,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -53,6 +55,10 @@ public class PersonService {
 
     @Transactional
     public PersonDto create(CreatePersonRequest request) {
+        personRepository.findByDocumentNumber(request.getDocumentNumber()).ifPresent(p -> {
+            throw new ResourceAlreadyExistsException("Ya existe una persona con el número de documento " + request.getDocumentNumber());
+        });
+
         DocumentTypeEntity documentTypeEntity = documentTypeRepository.findById(request.getIdDocumentType())
                 .orElseThrow(() -> new ResourceNotFoundException("El tipo de documento con id " + request.getIdDocumentType() + " no fue encontrado."));
 
@@ -73,6 +79,11 @@ public class PersonService {
     public PersonDto update(Long id, UpdatePersonRequest request) {
         PersonEntity personEntity = personRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("La persona con id " + id + " no fue encontrada."));
+
+        Optional<PersonEntity> existingPersonByDoc = personRepository.findByDocumentNumber(request.getDocumentNumber());
+        if (existingPersonByDoc.isPresent() && !existingPersonByDoc.get().getId().equals(id)) {
+            throw new ResourceAlreadyExistsException("El número de documento " + request.getDocumentNumber() + " ya está en uso por otra persona.");
+        }
 
         DocumentTypeEntity documentTypeEntity = documentTypeRepository.findById(request.getIdDocumentType())
                 .orElseThrow(() -> new ResourceNotFoundException("El tipo de documento con id " + request.getIdDocumentType() + " no fue encontrado."));

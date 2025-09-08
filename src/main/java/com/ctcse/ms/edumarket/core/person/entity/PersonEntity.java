@@ -33,7 +33,7 @@ public class PersonEntity {
     @Column(name = "address", length = 255)
     private String address;
 
-    @Column(name = "documentNumber", length = 16)
+    @Column(name = "documentNumber", length = 16, unique = true)
     private String documentNumber;
 
     @ManyToOne(optional = false)
