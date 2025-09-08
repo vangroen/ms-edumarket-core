@@ -17,4 +17,6 @@ public interface PaymentScheduleRepository extends JpaRepository<PaymentSchedule
 
     @Query("SELECT ps FROM PaymentScheduleEntity ps WHERE ps.installmentDueDate < :now AND ps.installmentStatus.id = 1")
     List<PaymentScheduleEntity> findOverdueInstallments(@Param("now") Instant now);
+
+    List<PaymentScheduleEntity> findAllByActiveTrue();
 }

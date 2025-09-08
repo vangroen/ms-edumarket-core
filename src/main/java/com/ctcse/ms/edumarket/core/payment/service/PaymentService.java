@@ -33,7 +33,7 @@ public class PaymentService {
 
     @Transactional(readOnly = true)
     public List<PaymentDto> findAll() {
-        List<PaymentEntity> entities = paymentRepository.findAll();
+        List<PaymentEntity> entities = paymentRepository.findAllByActiveTrue();
         return entities.stream()
                 .map(this::convertToDto)
                 .collect(Collectors.toList());

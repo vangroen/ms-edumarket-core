@@ -64,7 +64,7 @@ public class EnrollmentService {
 
     @Transactional(readOnly = true)
     public List<EnrollmentDto> findAll() {
-        return enrollmentRepository.findAll().stream()
+        return enrollmentRepository.findAllByActiveTrue().stream()
                 .map(this::convertToDto)
                 .collect(Collectors.toList());
     }
