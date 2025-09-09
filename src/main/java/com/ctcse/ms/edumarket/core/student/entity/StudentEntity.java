@@ -36,4 +36,7 @@ public class StudentEntity {
     @OneToOne(optional = false)
     @JoinColumn(name = "idPerson", nullable = false)
     private PersonEntity person;
+
+    @Column(name = "active", nullable = false)
+    private boolean active = true;
 }

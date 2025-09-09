@@ -7,10 +7,17 @@ import com.ctcse.ms.edumarket.core.agent.entity.AgentEntity;
 import com.ctcse.ms.edumarket.core.common.exception.ResourceAlreadyExistsException;
 import com.ctcse.ms.edumarket.core.common.exception.ResourceNotFoundException;
 import com.ctcse.ms.edumarket.core.documentType.dto.DocumentTypeDto;
+import com.ctcse.ms.edumarket.core.enrollment.entity.EnrollmentEntity;
+import com.ctcse.ms.edumarket.core.enrollment.repository.EnrollmentRepository;
+import com.ctcse.ms.edumarket.core.enrollment.service.EnrollmentService;
 import com.ctcse.ms.edumarket.core.institution.dto.InstitutionDto;
 import com.ctcse.ms.edumarket.core.institution.entity.InstitutionEntity;
 import com.ctcse.ms.edumarket.core.institution.repository.InstitutionRepository;
 import com.ctcse.ms.edumarket.core.institutionType.dto.InstitutionTypeDto;
+import com.ctcse.ms.edumarket.core.payment.entity.PaymentEntity;
+import com.ctcse.ms.edumarket.core.payment.repository.PaymentRepository;
+import com.ctcse.ms.edumarket.core.paymentSchedule.entity.PaymentScheduleEntity;
+import com.ctcse.ms.edumarket.core.paymentSchedule.repository.PaymentScheduleRepository;
 import com.ctcse.ms.edumarket.core.person.dto.PersonDto;
 import com.ctcse.ms.edumarket.core.person.entity.PersonEntity;
 import com.ctcse.ms.edumarket.core.person.repository.PersonRepository;
@@ -23,6 +30,7 @@ import com.ctcse.ms.edumarket.core.student.dto.UpdateStudentRequest;
 import com.ctcse.ms.edumarket.core.student.entity.StudentEntity;
 import com.ctcse.ms.edumarket.core.student.repository.StudentRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -30,7 +38,6 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
-@RequiredArgsConstructor
 public class StudentService {
 
     private final StudentRepository studentRepository;
@@ -38,6 +45,34 @@ public class StudentService {
     private final InstitutionRepository institutionRepository;
     private final AcademicRankRepository academicRankRepository;
     private final PersonRepository personRepository;
+    private final EnrollmentRepository enrollmentRepository;
+    private final PaymentScheduleRepository paymentScheduleRepository;
+    private final PaymentRepository paymentRepository;
+
+    private final EnrollmentService enrollmentService;
+
+    public StudentService(
+            StudentRepository studentRepository,
+            ProfessionRepository professionRepository,
+            InstitutionRepository institutionRepository,
+            AcademicRankRepository academicRankRepository,
+            PersonRepository personRepository,
+            EnrollmentRepository enrollmentRepository,
+            PaymentScheduleRepository paymentScheduleRepository,
+            PaymentRepository paymentRepository,
+            @Lazy EnrollmentService enrollmentService
+    ) {
+        this.studentRepository = studentRepository;
+        this.professionRepository = professionRepository;
+        this.institutionRepository = institutionRepository;
+        this.academicRankRepository = academicRankRepository;
+        this.personRepository = personRepository;
+        this.enrollmentRepository = enrollmentRepository;
+        this.paymentScheduleRepository = paymentScheduleRepository;
+        this.paymentRepository = paymentRepository;
+        this.enrollmentService = enrollmentService;
+    }
+
 
     @Transactional(readOnly = true)
     public List<StudentDto> findAll() {
@@ -119,8 +154,8 @@ public class StudentService {
 
     @Transactional
     public StudentDto create(CreateStudentRequest request) {
-        studentRepository.findByPersonId(request.getIdPerson()).ifPresent(s -> {
-            throw new ResourceAlreadyExistsException("La persona con id " + request.getIdPerson() + " ya está registrada como estudiante.");
+        studentRepository.findByPersonIdAndActiveTrue(request.getIdPerson()).ifPresent(s -> {
+            throw new ResourceAlreadyExistsException("La persona con id " + request.getIdPerson() + " ya está registrada como un estudiante activo.");
         });
 
         ProfessionEntity professionEntity = professionRepository.findById(request.getIdProfession())
@@ -180,9 +215,16 @@ public class StudentService {
 
     @Transactional
     public void deleteById(Long id) {
-        if (!studentRepository.existsById(id)) {
-            throw new ResourceNotFoundException("El estudiante con id " + id + " no fue encontrado.");
+        StudentEntity studentEntity = studentRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("El estudiante con id " + id + " no fue encontrado."));
+
+        studentEntity.setActive(false);
+        studentRepository.save(studentEntity);
+
+        List<EnrollmentEntity> enrollments = enrollmentRepository.findAllByStudentIdAndActiveTrue(id);
+        for (EnrollmentEntity enrollment : enrollments) {
+            enrollmentService.deleteById(enrollment.getId()); // Esta llamada ahora funcionará
         }
-        studentRepository.deleteById(id);
     }
 }
+

@@ -46,7 +46,7 @@ public class StudentController {
     public ResponseEntity<Map<String, String>> delete(@PathVariable Long id) {
         service.deleteById(id);
         Map<String, String> response = new HashMap<>();
-        response.put("message", "El estudiante con id " + id + " ha sido eliminado exitosamente.");
+        response.put("message", "El estudiante con id " + id + " ha sido desactivado exitosamente.");
         return ResponseEntity.ok(response);
     }
 }
