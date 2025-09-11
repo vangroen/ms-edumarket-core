@@ -5,17 +5,19 @@ import com.ctcse.ms.edumarket.core.conceptType.service.ConceptTypeService;
 import com.ctcse.ms.edumarket.core.conceptType.entity.ConceptTypeEntity;
 import com.ctcse.ms.edumarket.core.conceptType.repository.ConceptTypeRepository;
 import com.ctcse.ms.edumarket.core.enrollment.entity.EnrollmentEntity;
-import com.ctcse.ms.edumarket.core.enrollment.service.EnrollmentService;
 import com.ctcse.ms.edumarket.core.enrollment.repository.EnrollmentRepository;
 import com.ctcse.ms.edumarket.core.installmentStatus.service.InstallmentStatusService;
 import com.ctcse.ms.edumarket.core.installmentStatus.repository.InstallmentStatusRepository;
 import com.ctcse.ms.edumarket.core.installmentStatus.entity.InstallmentStatusEntity;
+import com.ctcse.ms.edumarket.core.payment.entity.PaymentEntity;
+import com.ctcse.ms.edumarket.core.payment.repository.PaymentRepository;
+import com.ctcse.ms.edumarket.core.payment.service.PaymentService;
 import com.ctcse.ms.edumarket.core.paymentSchedule.dto.CreatePaymentScheduleRequest;
 import com.ctcse.ms.edumarket.core.paymentSchedule.dto.PaymentScheduleDto;
 import com.ctcse.ms.edumarket.core.paymentSchedule.dto.UpdatePaymentScheduleRequest;
 import com.ctcse.ms.edumarket.core.paymentSchedule.entity.PaymentScheduleEntity;
 import com.ctcse.ms.edumarket.core.paymentSchedule.repository.PaymentScheduleRepository;
-import lombok.RequiredArgsConstructor;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -26,27 +28,79 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
-@RequiredArgsConstructor
 public class PaymentScheduleService {
 
+    // --- DEPENDENCIAS EXISTENTES ---
     private final PaymentScheduleRepository paymentScheduleRepository;
     private final ConceptTypeRepository conceptTypeRepository;
     private final InstallmentStatusRepository installmentStatusRepository;
     private final EnrollmentRepository enrollmentRepository;
-    private final EnrollmentService enrollmentService;
     private final ConceptTypeService conceptTypeService;
     private final InstallmentStatusService installmentStatusService;
+
+    // --- NUEVAS DEPENDENCIAS PARA LA CASCADA DE ACTIVACIÓN ---
+    private final PaymentRepository paymentRepository;
+    private final PaymentService paymentService;
+
+    // --- CONSTRUCTOR EXPLÍCITO REEMPLAZANDO A @RequiredArgsConstructor ---
+    public PaymentScheduleService(
+            PaymentScheduleRepository paymentScheduleRepository,
+            ConceptTypeRepository conceptTypeRepository,
+            InstallmentStatusRepository installmentStatusRepository,
+            EnrollmentRepository enrollmentRepository,
+            ConceptTypeService conceptTypeService,
+            InstallmentStatusService installmentStatusService,
+            PaymentRepository paymentRepository,
+            @Lazy PaymentService paymentService // @Lazy para prevenir ciclos
+    ) {
+        this.paymentScheduleRepository = paymentScheduleRepository;
+        this.conceptTypeRepository = conceptTypeRepository;
+        this.installmentStatusRepository = installmentStatusRepository;
+        this.enrollmentRepository = enrollmentRepository;
+        this.conceptTypeService = conceptTypeService;
+        this.installmentStatusService = installmentStatusService;
+        this.paymentRepository = paymentRepository;
+        this.paymentService = paymentService;
+    }
+
+
+    // --- MÉTODO NUEVO PARA LA CASCADA DE ACTIVACIÓN ---
+    @Transactional
+    public void activateById(Long id) {
+        PaymentScheduleEntity schedule = paymentScheduleRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Cronograma no encontrado con id " + id));
+        schedule.setActive(true);
+        paymentScheduleRepository.save(schedule);
+
+        List<PaymentEntity> payments = paymentRepository.findAllByPaymentScheduleIdAndActiveFalse(id);
+        for (PaymentEntity payment : payments) {
+            paymentService.activateById(payment.getId());
+        }
+    }
+
+    // --- MÉTODO PARA DESACTIVACIÓN (BORRADO LÓGICO) ---
+    @Transactional
+    public void deactivateById(Long id) {
+        PaymentScheduleEntity schedule = paymentScheduleRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("El cronograma de pago con id " + id + " no fue encontrado."));
+        schedule.setActive(false);
+        paymentScheduleRepository.save(schedule);
+        // Aquí podrías continuar la cascada para desactivar los pagos si es necesario.
+    }
+
+
+    // ===============================================================
+    // --- TUS MÉTODOS EXISTENTES (SIN CAMBIOS) ---
+    // ===============================================================
 
     @Transactional(readOnly = true)
     public List<PaymentScheduleDto> findAll() {
         List<PaymentScheduleEntity> entities = paymentScheduleRepository.findAllByActiveTrue();
-        // Agrupamos todos los cronogramas por su matrícula correspondiente
         Map<EnrollmentEntity, List<PaymentScheduleEntity>> groupedByEnrollment = entities.stream()
                 .collect(Collectors.groupingBy(PaymentScheduleEntity::getEnrollment));
 
         List<PaymentScheduleDto> finalDtos = new ArrayList<>();
 
-        // Procesamos cada grupo (cada matrícula) de forma independiente
         for (List<PaymentScheduleEntity> schedulesForOneEnrollment : groupedByEnrollment.values()) {
             schedulesForOneEnrollment.sort(Comparator.comparing(PaymentScheduleEntity::getInstallmentDueDate));
             int monthlyInstallmentCounter = 0;
@@ -134,7 +188,6 @@ public class PaymentScheduleService {
         return convertToDto(entity);
     }
 
-    // --- MÉTODO NUEVO: ELIMINAR ---
     @Transactional
     public void deleteById(Long id) {
         if (!paymentScheduleRepository.existsById(id)) {
@@ -145,20 +198,17 @@ public class PaymentScheduleService {
 
     @Transactional(readOnly = true)
     public List<PaymentScheduleDto> findByEnrollmentId(Long enrollmentId) {
-        // 1. Busca todas las cuotas para una matrícula específica
         List<PaymentScheduleEntity> schedules = paymentScheduleRepository.findByEnrollmentId(enrollmentId);
 
         if (schedules.isEmpty()) {
             throw new ResourceNotFoundException("No se encontró un cronograma de pagos para la matrícula con id " + enrollmentId);
         }
 
-        // 2. Ordena las cuotas por fecha para asegurar la numeración correcta
         schedules.sort(Comparator.comparing(PaymentScheduleEntity::getInstallmentDueDate));
 
         List<PaymentScheduleDto> finalDtos = new ArrayList<>();
         int monthlyInstallmentCounter = 0;
 
-        // 3. Itera y aplica la lógica de numeración (igual que en findAll)
         for (PaymentScheduleEntity entity : schedules) {
             PaymentScheduleDto dto = convertToDto(entity);
 
@@ -172,3 +222,4 @@ public class PaymentScheduleService {
         return finalDtos;
     }
 }
+

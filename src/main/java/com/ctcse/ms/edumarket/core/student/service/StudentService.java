@@ -226,5 +226,20 @@ public class StudentService {
             enrollmentService.deleteById(enrollment.getId()); // Esta llamada ahora funcionará
         }
     }
+
+    @Transactional
+    public void activateById(Long id) {
+        StudentEntity studentEntity = studentRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("El estudiante con id " + id + " no fue encontrado."));
+
+        studentEntity.setActive(true);
+        studentRepository.save(studentEntity);
+
+        // Buscar y reactivar las matrículas inactivas
+        List<EnrollmentEntity> inactiveEnrollments = enrollmentRepository.findAllByStudentIdAndActiveFalse(id);
+        for (EnrollmentEntity enrollment : inactiveEnrollments) {
+            enrollmentService.activateById(enrollment.getId());
+        }
+    }
 }
 

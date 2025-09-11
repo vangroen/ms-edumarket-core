@@ -19,4 +19,6 @@ public interface PaymentScheduleRepository extends JpaRepository<PaymentSchedule
     List<PaymentScheduleEntity> findOverdueInstallments(@Param("now") Instant now);
 
     List<PaymentScheduleEntity> findAllByActiveTrue();
+
+    List<PaymentScheduleEntity> findAllByEnrollmentIdAndActiveFalse(Long enrollmentId);
 }

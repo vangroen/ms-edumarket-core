@@ -27,6 +27,7 @@ import com.ctcse.ms.edumarket.core.payment.repository.PaymentRepository;
 import com.ctcse.ms.edumarket.core.paymentSchedule.dto.ScheduledPaymentDto;
 import com.ctcse.ms.edumarket.core.paymentSchedule.entity.PaymentScheduleEntity;
 import com.ctcse.ms.edumarket.core.paymentSchedule.repository.PaymentScheduleRepository;
+import com.ctcse.ms.edumarket.core.paymentSchedule.service.PaymentScheduleService;
 import com.ctcse.ms.edumarket.core.student.entity.StudentEntity;
 import com.ctcse.ms.edumarket.core.student.repository.StudentRepository;
 import com.ctcse.ms.edumarket.core.student.service.StudentService;
@@ -61,6 +62,7 @@ public class EnrollmentService {
     private final StudentService studentService;
     private final AgentService agentService;
     private final CourseService courseService;
+    private final PaymentScheduleService paymentScheduleService;
 
     @Transactional(readOnly = true)
     public List<EnrollmentDto> findAll() {
@@ -313,6 +315,20 @@ public class EnrollmentService {
                 payments.forEach(payment -> payment.setActive(false));
                 paymentRepository.saveAll(payments);
             }
+        }
+    }
+
+    @Transactional
+    public void activateById(Long id) {
+        EnrollmentEntity enrollmentEntity = enrollmentRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("La matrícula con id " + id + " no fue encontrada."));
+
+        enrollmentEntity.setActive(true);
+        enrollmentRepository.save(enrollmentEntity);
+
+        List<PaymentScheduleEntity> schedules = paymentScheduleRepository.findAllByEnrollmentIdAndActiveFalse(id);
+        for (PaymentScheduleEntity schedule : schedules) {
+            paymentScheduleService.activateById(schedule.getId());
         }
     }
 }

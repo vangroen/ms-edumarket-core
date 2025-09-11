@@ -13,4 +13,6 @@ public interface PaymentRepository extends JpaRepository<PaymentEntity, Long> {
     void deleteAllByPaymentScheduleIn(List<PaymentScheduleEntity> schedules);
     List<PaymentEntity> findByPaymentScheduleIdIn(List<Long> paymentScheduleIds);
     List<PaymentEntity> findAllByActiveTrue();
+
+    List<PaymentEntity> findAllByPaymentScheduleIdAndActiveFalse(Long paymentScheduleId);
 }

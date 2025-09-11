@@ -10,4 +10,5 @@ import java.util.List;
 public interface EnrollmentRepository extends JpaRepository<EnrollmentEntity, Long> {
     List<EnrollmentEntity> findAllByActiveTrue();
     List<EnrollmentEntity> findAllByStudentIdAndActiveTrue(Long studentId);
+    List<EnrollmentEntity> findAllByStudentIdAndActiveFalse(Long studentId);
 }

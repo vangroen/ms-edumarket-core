@@ -49,4 +49,12 @@ public class StudentController {
         response.put("message", "El estudiante con id " + id + " ha sido desactivado exitosamente.");
         return ResponseEntity.ok(response);
     }
+
+    @PatchMapping("/{id}/activate")
+    public ResponseEntity<Map<String, String>> activate(@PathVariable Long id) {
+        service.activateById(id);
+        Map<String, String> response = new HashMap<>();
+        response.put("message", "El estudiante con id " + id + " ha sido activado exitosamente.");
+        return ResponseEntity.ok(response);
+    }
 }

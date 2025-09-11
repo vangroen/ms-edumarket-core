@@ -127,4 +127,12 @@ public class PaymentService {
         }
         paymentRepository.deleteById(id);
     }
+
+    @Transactional
+    public void activateById(Long id) {
+        PaymentEntity payment = paymentRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Pago no encontrado con id " + id));
+        payment.setActive(true);
+        paymentRepository.save(payment);
+    }
 }
