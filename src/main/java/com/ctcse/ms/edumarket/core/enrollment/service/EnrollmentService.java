@@ -32,6 +32,7 @@ import com.ctcse.ms.edumarket.core.student.entity.StudentEntity;
 import com.ctcse.ms.edumarket.core.student.repository.StudentRepository;
 import com.ctcse.ms.edumarket.core.student.service.StudentService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -40,7 +41,6 @@ import java.math.RoundingMode;
 import java.time.Instant;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
-import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -59,11 +59,61 @@ public class EnrollmentService {
     private final InstallmentStatusRepository installmentStatusRepository;
     private final PaymentRepository paymentRepository;
 
+    @Lazy
     private final StudentService studentService;
     private final AgentService agentService;
     private final CourseService courseService;
+    @Lazy
     private final PaymentScheduleService paymentScheduleService;
 
+    public EnrollmentDto convertToDto(EnrollmentEntity entity) {
+        if (entity == null) {
+            return null;
+        }
+        EnrollmentDto dto = new EnrollmentDto();
+        dto.setId(entity.getId());
+        dto.setTotalEnrollmentCost(entity.getTotalEnrollmentCost());
+        dto.setEnrollmentDate(entity.getEnrollmentDate());
+        dto.setActive(entity.isActive());
+        if (entity.getStudent() != null) {
+            dto.setStudent(studentService.convertToDto(entity.getStudent()));
+        }
+        if (entity.getAgent() != null) {
+            dto.setAgent(agentService.convertToDto(entity.getAgent()));
+        }
+        if (entity.getCourse() != null) {
+            final EnrolledCourseDto courseDto = getEnrolledCourseDto(entity);
+            dto.setCourse(courseDto);
+        }
+        if (entity.getInstitution() != null) {
+            final InstitutionDto institutionDto = getInstitutionDto(entity);
+            dto.setInstitution(institutionDto);
+        }
+
+        // --- LÓGICA OPTIMIZADA ---
+        // 1. Obtenemos todo el cronograma en una sola consulta.
+        List<PaymentScheduleEntity> schedule = paymentScheduleRepository.findByEnrollmentId(entity.getId());
+
+        // 2. Buscamos cada concepto en la lista que ya tenemos en memoria.
+        schedule.stream()
+                .filter(s -> s.getConceptType().getId() == 1L)
+                .findFirst()
+                .ifPresent(s -> dto.setEnrollmentFeeAmount(s.getInstallmentAmount()));
+
+        schedule.stream()
+                .filter(s -> s.getConceptType().getId() == 2L)
+                .findFirst()
+                .ifPresent(s -> dto.setMonthlyFeeAmount(s.getInstallmentAmount()));
+
+        schedule.stream()
+                .filter(s -> s.getConceptType().getId() == 3L)
+                .findFirst()
+                .ifPresent(s -> dto.setFinalRightsAmount(s.getInstallmentAmount()));
+
+        return dto;
+    }
+
+    // ... el resto de la clase no necesita cambios ...
     @Transactional(readOnly = true)
     public List<EnrollmentDto> findAll() {
         return enrollmentRepository.findAllByActiveTrue().stream()
@@ -174,36 +224,6 @@ public class EnrollmentService {
         return fullDetails;
     }
 
-    public EnrollmentDto convertToDto(EnrollmentEntity entity) {
-        if (entity == null) {
-            return null;
-        }
-        EnrollmentDto dto = new EnrollmentDto();
-        dto.setId(entity.getId());
-        dto.setTotalEnrollmentCost(entity.getTotalEnrollmentCost());
-        dto.setEnrollmentDate(entity.getEnrollmentDate());
-        dto.setActive(entity.isActive());
-        if (entity.getStudent() != null) {
-            dto.setStudent(studentService.convertToDto(entity.getStudent()));
-        }
-        if (entity.getAgent() != null) {
-            dto.setAgent(agentService.convertToDto(entity.getAgent()));
-        }
-        if (entity.getCourse() != null) {
-            final EnrolledCourseDto courseDto = getEnrolledCourseDto(entity);
-            dto.setCourse(courseDto);
-        }
-        if (entity.getInstitution() != null) {
-            final InstitutionDto institutionDto = getInstitutionDto(entity);
-            dto.setInstitution(institutionDto);
-        }
-        paymentScheduleRepository.findByEnrollmentIdAndConceptTypeId(entity.getId(), 1L)
-                .ifPresent(schedule -> dto.setEnrollmentFeeAmount(schedule.getInstallmentAmount()));
-        paymentScheduleRepository.findByEnrollmentIdAndConceptTypeId(entity.getId(), 3L)
-                .ifPresent(schedule -> dto.setFinalRightsAmount(schedule.getInstallmentAmount()));
-        return dto;
-    }
-
     private static InstitutionDto getInstitutionDto(EnrollmentEntity entity) {
         InstitutionDto institutionDto = new InstitutionDto();
         institutionDto.setId(entity.getInstitution().getId());
@@ -222,8 +242,6 @@ public class EnrollmentService {
         EnrolledCourseDto courseDto = new EnrolledCourseDto();
         courseDto.setId(entity.getCourse().getId());
         courseDto.setName(entity.getCourse().getName());
-        // La siguiente línea se elimina porque CourseEntity ya no tiene duración.
-        // courseDto.setDurationInMonths(entity.getCourse().getDurationInMonths());
         if (entity.getCourse().getCourseType() != null) {
             CourseTypeDto courseTypeDto = new CourseTypeDto();
             courseTypeDto.setId(entity.getCourse().getCourseType().getId());
@@ -294,21 +312,17 @@ public class EnrollmentService {
 
     @Transactional
     public void deleteById(Long id) {
-        // 1. Encontrar la matrícula o lanzar excepción si no existe
         EnrollmentEntity enrollmentEntity = enrollmentRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("La matrícula con id " + id + " no fue encontrada."));
 
-        // 2. Inactivar la matrícula
         enrollmentEntity.setActive(false);
         enrollmentRepository.save(enrollmentEntity);
 
-        // 3. Encontrar y inactivar todos los cronogramas de pago asociados
         List<PaymentScheduleEntity> schedules = paymentScheduleRepository.findByEnrollmentId(id);
         if (!schedules.isEmpty()) {
             schedules.forEach(schedule -> schedule.setActive(false));
             paymentScheduleRepository.saveAll(schedules);
 
-            // 4. Encontrar y inactivar todos los pagos asociados a esos cronogramas
             List<Long> scheduleIds = schedules.stream().map(PaymentScheduleEntity::getId).collect(Collectors.toList());
             List<PaymentEntity> payments = paymentRepository.findByPaymentScheduleIdIn(scheduleIds);
             if (!payments.isEmpty()) {
@@ -332,3 +346,4 @@ public class EnrollmentService {
         }
     }
 }
+

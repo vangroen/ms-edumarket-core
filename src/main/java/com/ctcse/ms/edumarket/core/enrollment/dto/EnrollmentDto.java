@@ -18,10 +18,12 @@ public class EnrollmentDto {
     private StudentDto student;
     private AgentDto agent;
 
-    private EnrolledCourseDto course; // <-- Usar el DTO simple
+    private EnrolledCourseDto course;
     private InstitutionDto institution;
 
     private BigDecimal enrollmentFeeAmount;
+
+    private BigDecimal monthlyFeeAmount;
     private BigDecimal finalRightsAmount;
 
     private boolean active;
