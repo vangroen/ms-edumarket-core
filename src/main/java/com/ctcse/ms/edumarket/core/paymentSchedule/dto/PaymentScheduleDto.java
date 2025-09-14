@@ -12,6 +12,7 @@ import java.time.Instant;
 public class PaymentScheduleDto {
 
     private Long id;
+    private Long enrollmentId;
     private BigDecimal installmentAmount;
     private Instant installmentDueDate;
     private ConceptTypeDto conceptType;
