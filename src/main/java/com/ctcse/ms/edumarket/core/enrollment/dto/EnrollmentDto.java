@@ -25,6 +25,7 @@ public class EnrollmentDto {
 
     private BigDecimal monthlyFeeAmount;
     private BigDecimal finalRightsAmount;
+    private Integer durationInMonths;
 
     private boolean active;
 }

@@ -90,6 +90,15 @@ public class EnrollmentService {
             dto.setInstitution(institutionDto);
         }
 
+        CourseInstitutionEntity courseOffering = entity.getCourse().getInstitutions().stream()
+                .filter(ci -> ci.getInstitution().getId().equals(entity.getInstitution().getId()))
+                .findFirst()
+                .orElse(null);
+
+        if (courseOffering != null) {
+            dto.setDurationInMonths(courseOffering.getDurationInMonths());
+        }
+
         // --- LÓGICA OPTIMIZADA ---
         // 1. Obtenemos todo el cronograma en una sola consulta.
         List<PaymentScheduleEntity> schedule = paymentScheduleRepository.findByEnrollmentId(entity.getId());
@@ -254,6 +263,16 @@ public class EnrollmentService {
             modalityDto.setDescription(entity.getCourse().getModality().getDescription());
             courseDto.setModality(modalityDto);
         }
+
+        CourseInstitutionEntity courseOffering = entity.getCourse().getInstitutions().stream()
+                .filter(ci -> ci.getInstitution().getId().equals(entity.getInstitution().getId()))
+                .findFirst()
+                .orElse(null);
+
+        if (courseOffering != null) {
+            courseDto.setDurationInMonths(courseOffering.getDurationInMonths());
+        }
+
         return courseDto;
     }
 

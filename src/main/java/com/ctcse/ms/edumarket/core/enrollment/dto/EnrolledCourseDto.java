@@ -10,4 +10,5 @@ public class EnrolledCourseDto {
     private String name;
     private CourseTypeDto courseType;
     private ModalityDto modality;
+    private Integer durationInMonths;
 }
