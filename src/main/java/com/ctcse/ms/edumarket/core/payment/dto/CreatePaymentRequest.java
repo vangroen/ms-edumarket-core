@@ -8,10 +8,7 @@ import java.time.Instant;
 @Data
 public class CreatePaymentRequest {
 
-    private BigDecimal paymentAmount;
-
     private Instant paymentDate;
-
     private Long idPaymentType;
     private Long idPaymentSchedule;
 }

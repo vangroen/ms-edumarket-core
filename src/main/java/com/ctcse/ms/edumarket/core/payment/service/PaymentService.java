@@ -1,6 +1,9 @@
 package com.ctcse.ms.edumarket.core.payment.service;
 
+import com.ctcse.ms.edumarket.core.common.exception.ResourceAlreadyExistsException;
 import com.ctcse.ms.edumarket.core.common.exception.ResourceNotFoundException;
+import com.ctcse.ms.edumarket.core.conceptType.dto.ConceptTypeDto;
+import com.ctcse.ms.edumarket.core.installmentStatus.dto.InstallmentStatusDto;
 import com.ctcse.ms.edumarket.core.installmentStatus.entity.InstallmentStatusEntity;
 import com.ctcse.ms.edumarket.core.installmentStatus.repository.InstallmentStatusRepository;
 import com.ctcse.ms.edumarket.core.payment.dto.CreatePaymentRequest;
@@ -18,6 +21,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -68,29 +72,74 @@ public class PaymentService {
         PaymentScheduleEntity paymentScheduleEntity = paymentScheduleRepository.findById(request.getIdPaymentSchedule())
                 .orElseThrow(() -> new ResourceNotFoundException("El cronograma de pago con id " + request.getIdPaymentSchedule() + " no fue encontrado."));
 
-        // --- INICIO DE LA NUEVA LÓGICA ---
+        // --- VALIDACIÓN DE PAGO DUPLICADO ---
+        Long currentStatusId = paymentScheduleEntity.getInstallmentStatus().getId();
+        if (paymentScheduleEntity.getInstallmentStatus().getId() == 2L) {
+            throw new ResourceAlreadyExistsException("La cuota con id " + request.getIdPaymentSchedule() + " ya ha sido pagada.");
+        }
 
-        // 1. Validar que el monto pagado sea suficiente (opcional pero recomendado)
-        // Por simplicidad, asumiremos que siempre se paga el monto exacto.
-
-        // 2. Buscar el estado "Pagado"
-        InstallmentStatusEntity paidStatus = installmentStatusRepository.findById(2L) // Asumiendo que 2L es 'Pagado'
+        InstallmentStatusEntity paidStatus = installmentStatusRepository.findById(2L) // Estado 'Pagado'
                 .orElseThrow(() -> new ResourceNotFoundException("El estado 'Pagado' no se encontró en la base de datos."));
 
-        // 3. Actualizar el estado de la cuota
         paymentScheduleEntity.setInstallmentStatus(paidStatus);
         paymentScheduleRepository.save(paymentScheduleEntity);
 
-        // --- FIN DE LA NUEVA LÓGICA ---
-
         PaymentEntity paymentEntity = new PaymentEntity();
-        paymentEntity.setPaymentAmount(request.getPaymentAmount());
+        paymentEntity.setPaymentAmount(paymentScheduleEntity.getInstallmentAmount());
         paymentEntity.setPaymentDate(request.getPaymentDate());
         paymentEntity.setPaymentType(paymentTypeEntity);
         paymentEntity.setPaymentSchedule(paymentScheduleEntity);
 
-        PaymentEntity savedPaymentEntity = paymentRepository.save(paymentEntity);
-        return convertToDto(savedPaymentEntity);
+        paymentRepository.save(paymentEntity);
+
+        // --- CONSTRUCCIÓN DE LA RESPUESTA SIMPLIFICADA ---
+        PaymentDto confirmationResponse = new PaymentDto();
+
+        confirmationResponse.setEnrollmentId(paymentScheduleEntity.getEnrollment().getId());
+        confirmationResponse.setPaymentDate(paymentEntity.getPaymentDate());
+
+        PaymentTypeDto paymentTypeDto = new PaymentTypeDto();
+        paymentTypeDto.setId(paymentTypeEntity.getId());
+        paymentTypeDto.setDescription(paymentTypeEntity.getDescription());
+        confirmationResponse.setPaymentType(paymentTypeDto);
+
+        InstallmentStatusDto statusDto = new InstallmentStatusDto();
+        statusDto.setId(paidStatus.getId());
+        statusDto.setStatus(paidStatus.getStatus());
+        confirmationResponse.setInstallmentStatus(statusDto);
+
+        // --- LÓGICA PARA NUMERAR LA CUOTA ---
+        ConceptTypeDto conceptTypeDto = new ConceptTypeDto();
+        conceptTypeDto.setId(paymentScheduleEntity.getConceptType().getId());
+        String conceptDescription = paymentScheduleEntity.getConceptType().getDescription();
+
+        // Si es una cuota mensual, calculamos su número
+        if (conceptTypeDto.getId() == 2L) { // 2L es 'Cuota mensual'
+            List<PaymentScheduleEntity> monthlyInstallments = paymentScheduleRepository.findByEnrollmentId(paymentScheduleEntity.getEnrollment().getId())
+                    .stream()
+                    .filter(schedule -> schedule.getConceptType().getId() == 2L)
+                    .sorted(Comparator.comparing(PaymentScheduleEntity::getInstallmentDueDate))
+                    .collect(Collectors.toList());
+
+            int installmentNumber = -1;
+            for (int i = 0; i < monthlyInstallments.size(); i++) {
+                if (monthlyInstallments.get(i).getId().equals(paymentScheduleEntity.getId())) {
+                    installmentNumber = i + 1;
+                    break;
+                }
+            }
+
+            if (installmentNumber != -1) {
+                conceptDescription = "Cuota " + installmentNumber;
+            }
+        }
+
+        conceptTypeDto.setDescription(conceptDescription);
+        confirmationResponse.setConceptType(conceptTypeDto);
+
+        confirmationResponse.setMessage("Pago registrado exitosamente.");
+
+        return confirmationResponse;
     }
 
     @Transactional
