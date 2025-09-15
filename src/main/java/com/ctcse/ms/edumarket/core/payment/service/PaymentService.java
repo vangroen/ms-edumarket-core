@@ -73,7 +73,7 @@ public class PaymentService {
                 .orElseThrow(() -> new ResourceNotFoundException("El cronograma de pago con id " + request.getIdPaymentSchedule() + " no fue encontrado."));
 
         // --- VALIDACIÓN DE PAGO DUPLICADO ---
-        Long currentStatusId = paymentScheduleEntity.getInstallmentStatus().getId();
+//        Long currentStatusId = paymentScheduleEntity.getInstallmentStatus().getId();
         if (paymentScheduleEntity.getInstallmentStatus().getId() == 2L) {
             throw new ResourceAlreadyExistsException("La cuota con id " + request.getIdPaymentSchedule() + " ya ha sido pagada.");
         }
